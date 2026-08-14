@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>ghostty keybinds</title>
+	<meta name="description" content="default keybind cheatsheet for the Ghostty terminal" />
+	<meta name="robots" content="index, follow" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+	<link rel="stylesheet" href="keybinds.css" />
+</head>
+
+<body>
+	<main class="terminal">
+		<div class="header">
+			<h1 class="name">ghostty</h1>
+			<p class="tagline">default keybinds &mdash; a fast terminal emulator<span class="cursor" aria-hidden="true">_</span></p>
+		</div>
+
+		<p class="back"><a href="index.html">keybinds</a></p>
+
+		<p class="note"><kbd class="key">super</kbd> is <kbd class="key">Cmd</kbd> on macOS and <kbd class="key">Super/Win</kbd> on Linux. run
+			<code>ghostty +list-keybinds --default</code> to see all bindings. this cheatsheet covers the most useful defaults.</p>
+
+		<section>
+			<h2>clipboard &amp; selection</h2>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">super+c</kbd></td><td class="desc">Copy selection to clipboard</td><td class="cmd">copy_to_clipboard</td></tr>
+					<tr><td class="keys"><kbd class="key">super+v</kbd></td><td class="desc">Paste from clipboard</td><td class="cmd">paste_from_clipboard</td></tr>
+					<tr><td class="keys"><kbd class="key">super+shift+v</kbd></td><td class="desc">Paste from primary selection</td><td class="cmd">paste_from_selection</td></tr>
+					<tr><td class="keys"><kbd class="key">super+a</kbd></td><td class="desc">Select all text in the surface</td><td class="cmd">select_all</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>tabs</h2>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">super+t</kbd></td><td class="desc">New tab</td><td class="cmd">new_tab</td></tr>
+					<tr><td class="keys"><kbd class="key">super+shift+]</kbd></td><td class="desc">Next tab</td><td class="cmd">next_tab</td></tr>
+					<tr><td class="keys"><kbd class="key">super+shift+[</kbd></td><td class="desc">Previous tab</td><td class="cmd">previous_tab</td></tr>
+					<tr><td class="keys"><kbd class="key">ctrl+tab</kbd></td><td class="desc">Next tab</td><td class="cmd">next_tab</td></tr>
+					<tr><td class="keys"><kbd class="key">ctrl+shift+tab</kbd></td><td class="desc">Previous tab</td><td class="cmd">previous_tab</td></tr>
+					<tr><td class="keys"><kbd class="key">super+1</kbd> &ndash; <kbd class="key">super+8</kbd></td><td class="desc">Go to tab 1&ndash;8</td><td class="cmd">goto_tab:&lt;n&gt;</td></tr>
+					<tr><td class="keys"><kbd class="key">super+9</kbd></td><td class="desc">Go to last tab</td><td class="cmd">goto_tab:last</td></tr>
+					<tr><td class="keys"><kbd class="key">super+alt+w</kbd></td><td class="desc">Close tab</td><td class="cmd">close_tab</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>windows</h2>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">super+n</kbd></td><td class="desc">New window</td><td class="cmd">new_window</td></tr>
+					<tr><td class="keys"><kbd class="key">super+w</kbd></td><td class="desc">Close surface</td><td class="cmd">close_surface</td></tr>
+					<tr><td class="keys"><kbd class="key">super+shift+w</kbd></td><td class="desc">Close window</td><td class="cmd">close_window</td></tr>
+					<tr><td class="keys"><kbd class="key">super+alt+shift+w</kbd></td><td class="desc">Close all windows</td><td class="cmd">close_all_windows</td></tr>
+					<tr><td class="keys"><kbd class="key">super+enter</kbd></td><td class="desc">Toggle fullscreen</td><td class="cmd">toggle_fullscreen</td></tr>
+					<tr><td class="keys"><kbd class="key">super+ctrl+f</kbd></td><td class="desc">Toggle fullscreen</td><td class="cmd">toggle_fullscreen</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>splits</h2>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">super+d</kbd></td><td class="desc">New split (right)</td><td class="cmd">new_split:right</td></tr>
+					<tr><td class="keys"><kbd class="key">super+shift+d</kbd></td><td class="desc">New split (down)</td><td class="cmd">new_split:down</td></tr>
+					<tr><td class="keys"><kbd class="key">super+[</kbd></td><td class="desc">Go to previous split</td><td class="cmd">goto_split:previous</td></tr>
+					<tr><td class="keys"><kbd class="key">super+]</kbd></td><td class="desc">Go to next split</td><td class="cmd">goto_split:next</td></tr>
+					<tr><td class="keys"><kbd class="key">super+alt+Up</kbd></td><td class="desc">Go to split above</td><td class="cmd">goto_split:up</td></tr>
+					<tr><td class="keys"><kbd class="key">super+alt+Down</kbd></td><td class="desc">Go to split below</td><td class="cmd">goto_split:down</td></tr>
+					<tr><td class="keys"><kbd class="key">super+alt+Left</kbd></td><td class="desc">Go to split left</td><td class="cmd">goto_split:left</td></tr>
+					<tr><td class="keys"><kbd class="key">super+alt+Right</kbd></td><td class="desc">Go to split right</td><td class="cmd">goto_split:right</td></tr>
+					<tr><td class="keys"><kbd class="key">super+ctrl+Up</kbd></td><td class="desc">Resize split up by 10px</td><td class="cmd">resize_split:up,10</td></tr>
+					<tr><td class="keys"><kbd class="key">super+ctrl+Down</kbd></td><td class="desc">Resize split down by 10px</td><td class="cmd">resize_split:down,10</td></tr>
+					<tr><td class="keys"><kbd class="key">super+ctrl+Left</kbd></td><td class="desc">Resize split left by 10px</td><td class="cmd">resize_split:left,10</td></tr>
+					<tr><td class="keys"><kbd class="key">super+ctrl+Right</kbd></td><td class="desc">Resize split right by 10px</td><td class="cmd">resize_split:right,10</td></tr>
+					<tr><td class="keys"><kbd class="key">super+ctrl+=</kbd></td><td class="desc">Equalize splits</td><td class="cmd">equalize_splits</td></tr>
+					<tr><td class="keys"><kbd class="key">super+shift+enter</kbd></td><td class="desc">Toggle split zoom</td><td class="cmd">toggle_split_zoom</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>font size</h2>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">super+=</kbd></td><td class="desc">Increase font size</td><td class="cmd">increase_font_size:1</td></tr>
+					<tr><td class="keys"><kbd class="key">super++</kbd></td><td class="desc">Increase font size (from shift)</td><td class="cmd">increase_font_size:1</td></tr>
+					<tr><td class="keys"><kbd class="key">super+-</kbd></td><td class="desc">Decrease font size</td><td class="cmd">decrease_font_size:1</td></tr>
+					<tr><td class="keys"><kbd class="key">super+0</kbd></td><td class="desc">Reset font size</td><td class="cmd">reset_font_size</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>scrolling</h2>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">super+PageUp</kbd></td><td class="desc">Scroll page up</td><td class="cmd">scroll_page_up</td></tr>
+					<tr><td class="keys"><kbd class="key">super+PageDown</kbd></td><td class="desc">Scroll page down</td><td class="cmd">scroll_page_down</td></tr>
+					<tr><td class="keys"><kbd class="key">super+Home</kbd></td><td class="desc">Scroll to top</td><td class="cmd">scroll_to_top</td></tr>
+					<tr><td class="keys"><kbd class="key">super+End</kbd></td><td class="desc">Scroll to bottom</td><td class="cmd">scroll_to_bottom</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>jump to prompt</h2>
+			<p class="note">requires shell integration; jumps between shell prompts (e.g. between command outputs).</p>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">super+Up</kbd></td><td class="desc">Jump to previous prompt</td><td class="cmd">jump_to_prompt:-1</td></tr>
+					<tr><td class="keys"><kbd class="key">super+Down</kbd></td><td class="desc">Jump to next prompt</td><td class="cmd">jump_to_prompt:1</td></tr>
+					<tr><td class="keys"><kbd class="key">super+shift+Up</kbd></td><td class="desc">Jump to previous prompt</td><td class="cmd">jump_to_prompt:-1</td></tr>
+					<tr><td class="keys"><kbd class="key">super+shift+Down</kbd></td><td class="desc">Jump to next prompt</td><td class="cmd">jump_to_prompt:1</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>shell line editing</h2>
+			<p class="note">sends control sequences that emulate common readline shortcuts when a shell is active.</p>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">super+Left</kbd></td><td class="desc">Jump to start of line (sends Ctrl-A)</td><td class="cmd">text:\x01</td></tr>
+					<tr><td class="keys"><kbd class="key">super+Right</kbd></td><td class="desc">Jump to end of line (sends Ctrl-E)</td><td class="cmd">text:\x05</td></tr>
+					<tr><td class="keys"><kbd class="key">super+Backspace</kbd></td><td class="desc">Delete to start of line (sends Ctrl-U)</td><td class="cmd">text:\x15</td></tr>
+					<tr><td class="keys"><kbd class="key">alt+Left</kbd></td><td class="desc">Move back one word (sends Esc+b)</td><td class="cmd">esc:b</td></tr>
+					<tr><td class="keys"><kbd class="key">alt+Right</kbd></td><td class="desc">Move forward one word (sends Esc+f)</td><td class="cmd">esc:f</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>adjust selection</h2>
+			<p class="note">extends the current selection in the given direction.</p>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">shift+Left</kbd></td><td class="desc">Extend selection left</td><td class="cmd">adjust_selection:left</td></tr>
+					<tr><td class="keys"><kbd class="key">shift+Right</kbd></td><td class="desc">Extend selection right</td><td class="cmd">adjust_selection:right</td></tr>
+					<tr><td class="keys"><kbd class="key">shift+Up</kbd></td><td class="desc">Extend selection up</td><td class="cmd">adjust_selection:up</td></tr>
+					<tr><td class="keys"><kbd class="key">shift+Down</kbd></td><td class="desc">Extend selection down</td><td class="cmd">adjust_selection:down</td></tr>
+					<tr><td class="keys"><kbd class="key">shift+Home</kbd></td><td class="desc">Extend to start</td><td class="cmd">adjust_selection:home</td></tr>
+					<tr><td class="keys"><kbd class="key">shift+End</kbd></td><td class="desc">Extend to end</td><td class="cmd">adjust_selection:end</td></tr>
+					<tr><td class="keys"><kbd class="key">shift+PageUp</kbd></td><td class="desc">Extend selection page up</td><td class="cmd">adjust_selection:page_up</td></tr>
+					<tr><td class="keys"><kbd class="key">shift+PageDown</kbd></td><td class="desc">Extend selection page down</td><td class="cmd">adjust_selection:page_down</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>rings &amp; inspector</h2>
+			<p class="note">undo/redo rings operate on the terminal buffer (e.g. undone typing).</p>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">super+z</kbd></td><td class="desc">Undo</td><td class="cmd">undo</td></tr>
+					<tr><td class="keys"><kbd class="key">super+shift+z</kbd></td><td class="desc">Redo</td><td class="cmd">redo</td></tr>
+					<tr><td class="keys"><kbd class="key">super+shift+t</kbd></td><td class="desc">Undo (tab-level alias)</td><td class="cmd">undo</td></tr>
+					<tr><td class="keys"><kbd class="key">super+alt+i</kbd></td><td class="desc">Toggle inspector</td><td class="cmd">inspector:toggle</td></tr>
+					<tr><td class="keys"><kbd class="key">super+shift+p</kbd></td><td class="desc">Toggle command palette</td><td class="cmd">toggle_command_palette</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>config &amp; misc</h2>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">super+,</kbd></td><td class="desc">Open config file</td><td class="cmd">open_config</td></tr>
+					<tr><td class="keys"><kbd class="key">super+shift+,</kbd></td><td class="desc">Reload config</td><td class="cmd">reload_config</td></tr>
+					<tr><td class="keys"><kbd class="key">super+k</kbd></td><td class="desc">Clear screen</td><td class="cmd">clear_screen</td></tr>
+					<tr><td class="keys"><kbd class="key">super+q</kbd></td><td class="desc">Quit</td><td class="cmd">quit</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>screen capture</h2>
+			<p class="note">writes the scrollback / screen contents to an action: <code>open</code>, <code>copy</code>, or <code>paste</code>.</p>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">super+alt+shift+j</kbd></td><td class="desc">Write screen and open</td><td class="cmd">write_screen_file:open</td></tr>
+					<tr><td class="keys"><kbd class="key">super+ctrl+shift+j</kbd></td><td class="desc">Write screen and copy</td><td class="cmd">write_screen_file:copy</td></tr>
+					<tr><td class="keys"><kbd class="key">super+shift+j</kbd></td><td class="desc">Write screen and paste</td><td class="cmd">write_screen_file:paste</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<p class="footer">binding data from <code>ghostty +list-keybinds --default</code> and the <a href="https://ghostty.org/docs/config/keybind" rel="noopener noreferrer">official Ghostty keybinding docs</a>. the full <a href="https://ghostty.org/docs/config/keybind/reference" rel="noopener noreferrer">action reference</a> lists every available action.</p>
+	</main>
+</body>
+
+</html>
