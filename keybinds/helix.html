@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>helix keybinds</title>
+	<meta name="description" content="default keybind cheatsheet for the Helix editor" />
+	<meta name="robots" content="index, follow" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+	<link rel="stylesheet" href="keybinds.css" />
+</head>
+
+<body>
+	<main class="terminal">
+		<div class="header">
+			<h1 class="name">helix</h1>
+			<p class="tagline">default keybinds &mdash; selection-first modal editing<span class="cursor" aria-hidden="true">_</span></p>
+		</div>
+
+		<p class="back"><a href="index.html">keybinds</a></p>
+
+		<p class="note">selection-first: actions act on the current selection, which is also the cursor. press
+			<kbd class="key">Esc</kbd> to return to normal mode from anywhere. (LSP) requires a language server,
+			(TS) requires a tree-sitter grammar.</p>
+
+		<section>
+			<h2>movement (normal mode)</h2>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">h</kbd><span class="sep">,</span><kbd class="key">Left</kbd></td><td class="desc">Move left</td><td class="cmd">move_char_left</td></tr>
+					<tr><td class="keys"><kbd class="key">j</kbd><span class="sep">,</span><kbd class="key">Down</kbd></td><td class="desc">Move down</td><td class="cmd">move_visual_line_down</td></tr>
+					<tr><td class="keys"><kbd class="key">k</kbd><span class="sep">,</span><kbd class="key">Up</kbd></td><td class="desc">Move up</td><td class="cmd">move_visual_line_up</td></tr>
+					<tr><td class="keys"><kbd class="key">l</kbd><span class="sep">,</span><kbd class="key">Right</kbd></td><td class="desc">Move right</td><td class="cmd">move_char_right</td></tr>
+					<tr><td class="keys"><kbd class="key">w</kbd></td><td class="desc">Next word start</td><td class="cmd">move_next_word_start</td></tr>
+					<tr><td class="keys"><kbd class="key">b</kbd></td><td class="desc">Previous word start</td><td class="cmd">move_prev_word_start</td></tr>
+					<tr><td class="keys"><kbd class="key">e</kbd></td><td class="desc">Next word end</td><td class="cmd">move_next_word_end</td></tr>
+					<tr><td class="keys"><kbd class="key">W</kbd></td><td class="desc">Next WORD start</td><td class="cmd">move_next_long_word_start</td></tr>
+					<tr><td class="keys"><kbd class="key">B</kbd></td><td class="desc">Previous WORD start</td><td class="cmd">move_prev_long_word_start</td></tr>
+					<tr><td class="keys"><kbd class="key">E</kbd></td><td class="desc">Next WORD end</td><td class="cmd">move_next_long_word_end</td></tr>
+					<tr><td class="keys"><kbd class="key">f</kbd></td><td class="desc">Find next char (whole doc, not just line)</td><td class="cmd">find_next_char</td></tr>
+					<tr><td class="keys"><kbd class="key">t</kbd></td><td class="desc">Find till next char</td><td class="cmd">find_till_char</td></tr>
+					<tr><td class="keys"><kbd class="key">F</kbd></td><td class="desc">Find previous char</td><td class="cmd">find_prev_char</td></tr>
+					<tr><td class="keys"><kbd class="key">T</kbd></td><td class="desc">Find till previous char</td><td class="cmd">till_prev_char</td></tr>
+					<tr><td class="keys"><kbd class="key">G</kbd></td><td class="desc">Go to line number</td><td class="cmd">goto_line</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-.</kbd></td><td class="desc">Repeat last motion (f, t, m, [ or ])</td><td class="cmd">repeat_last_motion</td></tr>
+					<tr><td class="keys"><kbd class="key">Home</kbd></td><td class="desc">Start of line</td><td class="cmd">goto_line_start</td></tr>
+					<tr><td class="keys"><kbd class="key">End</kbd></td><td class="desc">End of line</td><td class="cmd">goto_line_end</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-b</kbd><span class="sep">,</span><kbd class="key">PgUp</kbd></td><td class="desc">Page up</td><td class="cmd">page_up</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-f</kbd><span class="sep">,</span><kbd class="key">PgDn</kbd></td><td class="desc">Page down</td><td class="cmd">page_down</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-u</kbd></td><td class="desc">Cursor + half page up</td><td class="cmd">page_cursor_half_up</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-d</kbd></td><td class="desc">Cursor + half page down</td><td class="cmd">page_cursor_half_down</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-i</kbd></td><td class="desc">Jump forward (jumplist)</td><td class="cmd">jump_forward</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-o</kbd></td><td class="desc">Jump backward (jumplist)</td><td class="cmd">jump_backward</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-s</kbd></td><td class="desc">Save selection to jumplist</td><td class="cmd">save_selection</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>changes</h2>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">r</kbd></td><td class="desc">Replace with a character</td><td class="cmd">replace</td></tr>
+					<tr><td class="keys"><kbd class="key">R</kbd></td><td class="desc">Replace with yanked text</td><td class="cmd">replace_with_yanked</td></tr>
+					<tr><td class="keys"><kbd class="key">~</kbd></td><td class="desc">Switch case of selection</td><td class="cmd">switch_case</td></tr>
+					<tr><td class="keys"><kbd class="key">`</kbd></td><td class="desc">Lowercase selection</td><td class="cmd">switch_to_lowercase</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-`</kbd></td><td class="desc">Uppercase selection</td><td class="cmd">switch_to_uppercase</td></tr>
+					<tr><td class="keys"><kbd class="key">i</kbd></td><td class="desc">Insert before selection</td><td class="cmd">insert_mode</td></tr>
+					<tr><td class="keys"><kbd class="key">a</kbd></td><td class="desc">Insert after selection (append)</td><td class="cmd">append_mode</td></tr>
+					<tr><td class="keys"><kbd class="key">I</kbd></td><td class="desc">Insert at line start</td><td class="cmd">insert_at_line_start</td></tr>
+					<tr><td class="keys"><kbd class="key">A</kbd></td><td class="desc">Insert at line end</td><td class="cmd">insert_at_line_end</td></tr>
+					<tr><td class="keys"><kbd class="key">o</kbd></td><td class="desc">Open line below</td><td class="cmd">open_below</td></tr>
+					<tr><td class="keys"><kbd class="key">O</kbd></td><td class="desc">Open line above</td><td class="cmd">open_above</td></tr>
+					<tr><td class="keys"><kbd class="key">.</kbd></td><td class="desc">Repeat last insert</td><td class="cmd">N/A</td></tr>
+					<tr><td class="keys"><kbd class="key">u</kbd></td><td class="desc">Undo</td><td class="cmd">undo</td></tr>
+					<tr><td class="keys"><kbd class="key">U</kbd></td><td class="desc">Redo</td><td class="cmd">redo</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-u</kbd></td><td class="desc">Earlier in history</td><td class="cmd">earlier</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-U</kbd></td><td class="desc">Later in history</td><td class="cmd">later</td></tr>
+					<tr><td class="keys"><kbd class="key">y</kbd></td><td class="desc">Yank selection</td><td class="cmd">yank</td></tr>
+					<tr><td class="keys"><kbd class="key">p</kbd></td><td class="desc">Paste after</td><td class="cmd">paste_after</td></tr>
+					<tr><td class="keys"><kbd class="key">P</kbd></td><td class="desc">Paste before</td><td class="cmd">paste_before</td></tr>
+					<tr><td class="keys"><kbd class="key">&quot;</kbd></td><td class="desc">Select register to yank/paste</td><td class="cmd">select_register</td></tr>
+					<tr><td class="keys"><kbd class="key">&gt;</kbd></td><td class="desc">Indent</td><td class="cmd">indent</td></tr>
+					<tr><td class="keys"><kbd class="key">&lt;</kbd></td><td class="desc">Unindent</td><td class="cmd">unindent</td></tr>
+					<tr><td class="keys"><kbd class="key">=</kbd></td><td class="desc">Format selection (LSP)</td><td class="cmd">format_selections</td></tr>
+					<tr><td class="keys"><kbd class="key">d</kbd></td><td class="desc">Delete selection</td><td class="cmd">delete_selection</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-d</kbd></td><td class="desc">Delete without yanking</td><td class="cmd">delete_selection_noyank</td></tr>
+					<tr><td class="keys"><kbd class="key">c</kbd></td><td class="desc">Change selection (delete + insert)</td><td class="cmd">change_selection</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-c</kbd></td><td class="desc">Change without yanking</td><td class="cmd">change_selection_noyank</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-a</kbd></td><td class="desc">Increment number under cursor</td><td class="cmd">increment</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-x</kbd></td><td class="desc">Decrement number under cursor</td><td class="cmd">decrement</td></tr>
+					<tr><td class="keys"><kbd class="key">Q</kbd></td><td class="desc">Start/stop macro recording</td><td class="cmd">record_macro</td></tr>
+					<tr><td class="keys"><kbd class="key">q</kbd></td><td class="desc">Replay recorded macro</td><td class="cmd">replay_macro</td></tr>
+				</tbody>
+			</table>
+
+			<h3>shell</h3>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">|</kbd></td><td class="desc">Pipe each selection through shell, replace with output</td><td class="cmd">shell_pipe</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-|</kbd></td><td class="desc">Pipe through shell, ignore output</td><td class="cmd">shell_pipe_to</td></tr>
+					<tr><td class="keys"><kbd class="key">!</kbd></td><td class="desc">Insert shell output before each selection</td><td class="cmd">shell_insert_output</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-!</kbd></td><td class="desc">Append shell output after each selection</td><td class="cmd">shell_append_output</td></tr>
+					<tr><td class="keys"><kbd class="key">$</kbd></td><td class="desc">Pipe to shell, keep selections where exit code 0</td><td class="cmd">shell_keep_pipe</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>selection manipulation</h2>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">s</kbd></td><td class="desc">Select all regex matches inside selections</td><td class="cmd">select_regex</td></tr>
+					<tr><td class="keys"><kbd class="key">S</kbd></td><td class="desc">Split selection on regex matches</td><td class="cmd">split_selection</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-s</kbd></td><td class="desc">Split selection on newlines</td><td class="cmd">split_selection_on_newline</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt--</kbd></td><td class="desc">Merge selections</td><td class="cmd">merge_selections</td></tr>
+					<tr><td class="keys"><kbd class="key">&amp;</kbd></td><td class="desc">Align selection in columns</td><td class="cmd">align_selections</td></tr>
+					<tr><td class="keys"><kbd class="key">_</kbd></td><td class="desc">Trim whitespace from selection</td><td class="cmd">trim_selections</td></tr>
+					<tr><td class="keys"><kbd class="key">;</kbd></td><td class="desc">Collapse selection to single cursor</td><td class="cmd">collapse_selection</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-;</kbd></td><td class="desc">Flip cursor and anchor</td><td class="cmd">flip_selections</td></tr>
+					<tr><td class="keys"><kbd class="key">,</kbd></td><td class="desc">Keep only primary selection</td><td class="cmd">keep_primary_selection</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-,</kbd></td><td class="desc">Remove primary selection</td><td class="cmd">remove_primary_selection</td></tr>
+					<tr><td class="keys"><kbd class="key">C</kbd></td><td class="desc">Copy selection to next line (cursor below)</td><td class="cmd">copy_selection_on_next_line</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-C</kbd></td><td class="desc">Copy selection to prev line (cursor above)</td><td class="cmd">copy_selection_on_prev_line</td></tr>
+					<tr><td class="keys"><kbd class="key">(</kbd></td><td class="desc">Rotate main selection backward</td><td class="cmd">rotate_selections_backward</td></tr>
+					<tr><td class="keys"><kbd class="key">)</kbd></td><td class="desc">Rotate main selection forward</td><td class="cmd">rotate_selections_forward</td></tr>
+					<tr><td class="keys"><kbd class="key">%</kbd></td><td class="desc">Select entire file</td><td class="cmd">select_all</td></tr>
+					<tr><td class="keys"><kbd class="key">x</kbd></td><td class="desc">Select current line (extend down if repeated)</td><td class="cmd">extend_line_below</td></tr>
+					<tr><td class="keys"><kbd class="key">X</kbd></td><td class="desc">Extend selection to line bounds</td><td class="cmd">extend_to_line_bounds</td></tr>
+					<tr><td class="keys"><kbd class="key">J</kbd></td><td class="desc">Join lines inside selection</td><td class="cmd">join_selections</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-c</kbd></td><td class="desc">Toggle comment</td><td class="cmd">toggle_comments</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-o</kbd><span class="sep">,</span><kbd class="key">Alt-Up</kbd></td><td class="desc">Expand to parent syntax node (TS)</td><td class="cmd">expand_selection</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-i</kbd><span class="sep">,</span><kbd class="key">Alt-Down</kbd></td><td class="desc">Shrink syntax node (TS)</td><td class="cmd">shrink_selection</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-p</kbd><span class="sep">,</span><kbd class="key">Alt-Left</kbd></td><td class="desc">Previous sibling node (TS)</td><td class="cmd">select_prev_sibling</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-n</kbd><span class="sep">,</span><kbd class="key">Alt-Right</kbd></td><td class="desc">Next sibling node (TS)</td><td class="cmd">select_next_sibling</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>search</h2>
+			<p class="note">operates on the <kbd class="key">/</kbd> register by default; use <kbd class="key">&quot;</kbd> to pick another.</p>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">/</kbd></td><td class="desc">Search for regex pattern</td><td class="cmd">search</td></tr>
+					<tr><td class="keys"><kbd class="key">?</kbd></td><td class="desc">Search for previous pattern</td><td class="cmd">rsearch</td></tr>
+					<tr><td class="keys"><kbd class="key">n</kbd></td><td class="desc">Next search match</td><td class="cmd">search_next</td></tr>
+					<tr><td class="keys"><kbd class="key">N</kbd></td><td class="desc">Previous search match</td><td class="cmd">search_prev</td></tr>
+					<tr><td class="keys"><kbd class="key">*</kbd></td><td class="desc">Use selection as pattern (word-boundary aware)</td><td class="cmd">search_selection_detect_word_boundaries</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-*</kbd></td><td class="desc">Use selection as pattern</td><td class="cmd">search_selection</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>minor modes</h2>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">v</kbd></td><td class="desc">Enter select (extend) mode</td><td class="cmd">select_mode</td></tr>
+					<tr><td class="keys"><kbd class="key">g</kbd></td><td class="desc">Enter goto mode</td><td class="cmd">N/A</td></tr>
+					<tr><td class="keys"><kbd class="key">m</kbd></td><td class="desc">Enter match mode</td><td class="cmd">N/A</td></tr>
+					<tr><td class="keys"><kbd class="key">:</kbd></td><td class="desc">Enter command mode</td><td class="cmd">command_mode</td></tr>
+					<tr><td class="keys"><kbd class="key">z</kbd></td><td class="desc">Enter view mode</td><td class="cmd">N/A</td></tr>
+					<tr><td class="keys"><kbd class="key">Z</kbd></td><td class="desc">Enter sticky view mode</td><td class="cmd">N/A</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-w</kbd></td><td class="desc">Enter window mode</td><td class="cmd">N/A</td></tr>
+					<tr><td class="keys"><kbd class="key">Space</kbd></td><td class="desc">Enter space mode</td><td class="cmd">N/A</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>view mode (z)</h2>
+			<p class="note">scroll/view adjustments without moving the selection. <kbd class="key">Z</kbd> is the sticky variant (Esc to exit).</p>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">z</kbd><span class="sep">,</span><kbd class="key">c</kbd></td><td class="desc">Vertically center the line</td><td class="cmd">align_view_center</td></tr>
+					<tr><td class="keys"><kbd class="key">t</kbd></td><td class="desc">Align line to top of screen</td><td class="cmd">align_view_top</td></tr>
+					<tr><td class="keys"><kbd class="key">b</kbd></td><td class="desc">Align line to bottom of screen</td><td class="cmd">align_view_bottom</td></tr>
+					<tr><td class="keys"><kbd class="key">m</kbd></td><td class="desc">Align line to middle (horizontal)</td><td class="cmd">align_view_middle</td></tr>
+					<tr><td class="keys"><kbd class="key">j</kbd><span class="sep">,</span><kbd class="key">down</kbd></td><td class="desc">Scroll view downwards</td><td class="cmd">scroll_down</td></tr>
+					<tr><td class="keys"><kbd class="key">k</kbd><span class="sep">,</span><kbd class="key">up</kbd></td><td class="desc">Scroll view upwards</td><td class="cmd">scroll_up</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-f</kbd></td><td class="desc">Page down</td><td class="cmd">page_down</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-b</kbd></td><td class="desc">Page up</td><td class="cmd">page_up</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>goto mode (g)</h2>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">g</kbd></td><td class="desc">Go to line number, else start of file</td><td class="cmd">goto_file_start</td></tr>
+					<tr><td class="keys"><kbd class="key">e</kbd></td><td class="desc">End of file</td><td class="cmd">goto_last_line</td></tr>
+					<tr><td class="keys"><kbd class="key">f</kbd></td><td class="desc">Go to files in selections</td><td class="cmd">goto_file</td></tr>
+					<tr><td class="keys"><kbd class="key">h</kbd></td><td class="desc">Start of line</td><td class="cmd">goto_line_start</td></tr>
+					<tr><td class="keys"><kbd class="key">l</kbd></td><td class="desc">End of line</td><td class="cmd">goto_line_end</td></tr>
+					<tr><td class="keys"><kbd class="key">s</kbd></td><td class="desc">First non-whitespace char of line</td><td class="cmd">goto_first_nonwhitespace</td></tr>
+					<tr><td class="keys"><kbd class="key">t</kbd></td><td class="desc">Top of the screen</td><td class="cmd">goto_window_top</td></tr>
+					<tr><td class="keys"><kbd class="key">c</kbd></td><td class="desc">Middle of the screen</td><td class="cmd">goto_window_center</td></tr>
+					<tr><td class="keys"><kbd class="key">b</kbd></td><td class="desc">Bottom of the screen</td><td class="cmd">goto_window_bottom</td></tr>
+					<tr><td class="keys"><kbd class="key">d</kbd></td><td class="desc">Go to definition (LSP)</td><td class="cmd">goto_definition</td></tr>
+					<tr><td class="keys"><kbd class="key">y</kbd></td><td class="desc">Go to type definition (LSP)</td><td class="cmd">goto_type_definition</td></tr>
+					<tr><td class="keys"><kbd class="key">r</kbd></td><td class="desc">Go to references (LSP)</td><td class="cmd">goto_reference</td></tr>
+					<tr><td class="keys"><kbd class="key">i</kbd></td><td class="desc">Go to implementation (LSP)</td><td class="cmd">goto_implementation</td></tr>
+					<tr><td class="keys"><kbd class="key">a</kbd></td><td class="desc">Last accessed (alternate) file</td><td class="cmd">goto_last_accessed_file</td></tr>
+					<tr><td class="keys"><kbd class="key">m</kbd></td><td class="desc">Last modified (alternate) file</td><td class="cmd">goto_last_modified_file</td></tr>
+					<tr><td class="keys"><kbd class="key">n</kbd></td><td class="desc">Next buffer</td><td class="cmd">goto_next_buffer</td></tr>
+					<tr><td class="keys"><kbd class="key">p</kbd></td><td class="desc">Previous buffer</td><td class="cmd">goto_previous_buffer</td></tr>
+					<tr><td class="keys"><kbd class="key">.</kbd></td><td class="desc">Last modification in current file</td><td class="cmd">goto_last_modification</td></tr>
+					<tr><td class="keys"><kbd class="key">w</kbd></td><td class="desc">Label every word; jump to label</td><td class="cmd">goto_word</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>match mode (m)</h2>
+			<p class="note">surround and textobject operations take an argument (e.g. <kbd class="key">m</kbd> <kbd class="key">s</kbd> <kbd class="key">(</kbd>).</p>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">m</kbd></td><td class="desc">Go to matching bracket (TS)</td><td class="cmd">match_brackets</td></tr>
+					<tr><td class="keys"><kbd class="key">s</kbd> <kbd class="key">&lt;ch&gt;</kbd></td><td class="desc">Surround current selection with &lt;ch&gt;</td><td class="cmd">surround_add</td></tr>
+					<tr><td class="keys"><kbd class="key">r</kbd> <kbd class="key">&lt;a&gt;</kbd> <kbd class="key">&lt;b&gt;</kbd></td><td class="desc">Replace surround &lt;a&gt; with &lt;b&gt;</td><td class="cmd">surround_replace</td></tr>
+					<tr><td class="keys"><kbd class="key">d</kbd> <kbd class="key">&lt;ch&gt;</kbd></td><td class="desc">Delete surround &lt;ch&gt;</td><td class="cmd">surround_delete</td></tr>
+					<tr><td class="keys"><kbd class="key">a</kbd> <kbd class="key">&lt;obj&gt;</kbd></td><td class="desc">Select around textobject</td><td class="cmd">select_textobject_around</td></tr>
+					<tr><td class="keys"><kbd class="key">i</kbd> <kbd class="key">&lt;obj&gt;</kbd></td><td class="desc">Select inside textobject</td><td class="cmd">select_textobject_inner</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>window mode (Ctrl-w)</h2>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">w</kbd><span class="sep">,</span><kbd class="key">Ctrl-w</kbd></td><td class="desc">Switch to next window</td><td class="cmd">rotate_view</td></tr>
+					<tr><td class="keys"><kbd class="key">v</kbd><span class="sep">,</span><kbd class="key">Ctrl-v</kbd></td><td class="desc">Vertical right split</td><td class="cmd">vsplit</td></tr>
+					<tr><td class="keys"><kbd class="key">s</kbd><span class="sep">,</span><kbd class="key">Ctrl-s</kbd></td><td class="desc">Horizontal bottom split</td><td class="cmd">hsplit</td></tr>
+					<tr><td class="keys"><kbd class="key">h</kbd><span class="sep">,</span><kbd class="key">Ctrl-h</kbd><span class="sep">,</span><kbd class="key">Left</kbd></td><td class="desc">Move to left split</td><td class="cmd">jump_view_left</td></tr>
+					<tr><td class="keys"><kbd class="key">j</kbd><span class="sep">,</span><kbd class="key">Ctrl-j</kbd><span class="sep">,</span><kbd class="key">Down</kbd></td><td class="desc">Move to split below</td><td class="cmd">jump_view_down</td></tr>
+					<tr><td class="keys"><kbd class="key">k</kbd><span class="sep">,</span><kbd class="key">Ctrl-k</kbd><span class="sep">,</span><kbd class="key">Up</kbd></td><td class="desc">Move to split above</td><td class="cmd">jump_view_up</td></tr>
+					<tr><td class="keys"><kbd class="key">l</kbd><span class="sep">,</span><kbd class="key">Ctrl-l</kbd><span class="sep">,</span><kbd class="key">Right</kbd></td><td class="desc">Move to right split</td><td class="cmd">jump_view_right</td></tr>
+					<tr><td class="keys"><kbd class="key">q</kbd><span class="sep">,</span><kbd class="key">Ctrl-q</kbd></td><td class="desc">Close current window</td><td class="cmd">wclose</td></tr>
+					<tr><td class="keys"><kbd class="key">o</kbd><span class="sep">,</span><kbd class="key">Ctrl-o</kbd></td><td class="desc">Close all windows but this one</td><td class="cmd">wonly</td></tr>
+					<tr><td class="keys"><kbd class="key">H</kbd></td><td class="desc">Swap window to the left</td><td class="cmd">swap_view_left</td></tr>
+					<tr><td class="keys"><kbd class="key">J</kbd></td><td class="desc">Swap window downwards</td><td class="cmd">swap_view_down</td></tr>
+					<tr><td class="keys"><kbd class="key">K</kbd></td><td class="desc">Swap window upwards</td><td class="cmd">swap_view_up</td></tr>
+					<tr><td class="keys"><kbd class="key">L</kbd></td><td class="desc">Swap window to the right</td><td class="cmd">swap_view_right</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>space mode (Space)</h2>
+			<p class="note">mostly pickers and LSP actions (a kludge layer).</p>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">f</kbd></td><td class="desc">File picker (workspace root)</td><td class="cmd">file_picker</td></tr>
+					<tr><td class="keys"><kbd class="key">F</kbd></td><td class="desc">File picker (current working dir)</td><td class="cmd">file_picker_in_current_directory</td></tr>
+					<tr><td class="keys"><kbd class="key">b</kbd></td><td class="desc">Buffer picker</td><td class="cmd">buffer_picker</td></tr>
+					<tr><td class="keys"><kbd class="key">j</kbd></td><td class="desc">Jumplist picker</td><td class="cmd">jumplist_picker</td></tr>
+					<tr><td class="keys"><kbd class="key">k</kbd></td><td class="desc">Hover documentation (LSP)</td><td class="cmd">hover</td></tr>
+					<tr><td class="keys"><kbd class="key">s</kbd></td><td class="desc">Document symbol picker (LSP)</td><td class="cmd">symbol_picker</td></tr>
+					<tr><td class="keys"><kbd class="key">S</kbd></td><td class="desc">Workspace symbol picker (LSP)</td><td class="cmd">workspace_symbol_picker</td></tr>
+					<tr><td class="keys"><kbd class="key">d</kbd></td><td class="desc">Document diagnostics (LSP)</td><td class="cmd">diagnostics_picker</td></tr>
+					<tr><td class="keys"><kbd class="key">D</kbd></td><td class="desc">Workspace diagnostics (LSP)</td><td class="cmd">workspace_diagnostics_picker</td></tr>
+					<tr><td class="keys"><kbd class="key">r</kbd></td><td class="desc">Rename symbol (LSP)</td><td class="cmd">rename_symbol</td></tr>
+					<tr><td class="keys"><kbd class="key">a</kbd></td><td class="desc">Apply code action (LSP)</td><td class="cmd">code_action</td></tr>
+					<tr><td class="keys"><kbd class="key">w</kbd></td><td class="desc">Enter window mode</td><td class="cmd">N/A</td></tr>
+					<tr><td class="keys"><kbd class="key">c</kbd></td><td class="desc">Toggle comment</td><td class="cmd">toggle_comments</td></tr>
+					<tr><td class="keys"><kbd class="key">y</kbd></td><td class="desc">Yank to clipboard</td><td class="cmd">yank_to_clipboard</td></tr>
+					<tr><td class="keys"><kbd class="key">p</kbd></td><td class="desc">Paste clipboard after</td><td class="cmd">paste_clipboard_after</td></tr>
+					<tr><td class="keys"><kbd class="key">P</kbd></td><td class="desc">Paste clipboard before</td><td class="cmd">paste_clipboard_before</td></tr>
+					<tr><td class="keys"><kbd class="key">'</kbd></td><td class="desc">Open last fuzzy picker</td><td class="cmd">last_picker</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>insert mode</h2>
+			<p class="note">minimal by design &mdash; changes are only checkpointed for undo on return to normal mode.</p>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">Esc</kbd></td><td class="desc">Switch to normal mode</td><td class="cmd">normal_mode</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-s</kbd></td><td class="desc">Commit undo checkpoint</td><td class="cmd">commit_undo_checkpoint</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-x</kbd></td><td class="desc">Autocomplete</td><td class="cmd">completion</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-r</kbd></td><td class="desc">Insert register content</td><td class="cmd">insert_register</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-w</kbd><span class="sep">,</span><kbd class="key">Alt-Bksp</kbd></td><td class="desc">Delete previous word</td><td class="cmd">delete_word_backward</td></tr>
+					<tr><td class="keys"><kbd class="key">Alt-d</kbd></td><td class="desc">Delete next word</td><td class="cmd">delete_word_forward</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-u</kbd></td><td class="desc">Delete to start of line</td><td class="cmd">kill_to_line_start</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-k</kbd></td><td class="desc">Delete to end of line</td><td class="cmd">kill_to_line_end</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-h</kbd></td><td class="desc">Delete previous char</td><td class="cmd">delete_char_backward</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-d</kbd></td><td class="desc">Delete next char</td><td class="cmd">delete_char_forward</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<section>
+			<h2>picker &amp; prompt</h2>
+			<p class="note">navigation within the fuzzy picker (and the <kbd class="key">:</kbd> command prompt).</p>
+			<table>
+				<thead>
+					<tr><th>key</th><th>description</th><th>command</th></tr>
+				</thead>
+				<tbody>
+					<tr><td class="keys"><kbd class="key">Up</kbd><span class="sep">,</span><kbd class="key">Ctrl-p</kbd></td><td class="desc">Previous item</td><td class="cmd">focus_previous</td></tr>
+					<tr><td class="keys"><kbd class="key">Down</kbd><span class="sep">,</span><kbd class="key">Ctrl-n</kbd></td><td class="desc">Next item</td><td class="cmd">focus_next</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-u</kbd></td><td class="desc">Scroll preview up</td><td class="cmd">scroll_up</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-d</kbd></td><td class="desc">Scroll preview down</td><td class="cmd">scroll_down</td></tr>
+					<tr><td class="keys"><kbd class="key">Enter</kbd></td><td class="desc">Confirm selection</td><td class="cmd">select_input</td></tr>
+					<tr><td class="keys"><kbd class="key">Esc</kbd><span class="sep">,</span><kbd class="key">Ctrl-c</kbd></td><td class="desc">Cancel</td><td class="cmd">close</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-h</kbd></td><td class="desc">Delete previous char</td><td class="cmd">delete_char_backward</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-w</kbd></td><td class="desc">Delete previous word</td><td class="cmd">delete_word_backward</td></tr>
+					<tr><td class="keys"><kbd class="key">Ctrl-r</kbd></td><td class="desc">Insert register content</td><td class="cmd">insert_register</td></tr>
+				</tbody>
+			</table>
+		</section>
+
+		<p class="footer">binding data from the <a href="https://docs.helix-editor.com/keymap.html" rel="noopener noreferrer">official Helix keymap</a>. this is a trimmed cheatsheet &mdash; <a href="https://docs.helix-editor.com/" rel="noopener noreferrer">full docs</a> for the rest.</p>
+	</main>
+</body>
+
+</html>
