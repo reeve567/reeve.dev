@@ -106,6 +106,7 @@ for (let i = 0; i < CELLS; i++) {
 // sets stay in module state so deadness tracking can reuse them
 let solverCandidates = new Set();
 let solverPrefixes = new Set();
+let deadDice = new Uint8Array(CELLS); // 1 = no unfound word can use this die
 
 function solveBoard(faces) {
 	const have = {};
@@ -147,7 +148,9 @@ function solveBoard(faces) {
 
 // gray out dice that no longer matter: a die is dead when no unfound
 // word can be spelled through it. runs the same prefix-pruned dfs,
-// marking the path of every word completion that's still wanted
+// marking the path of every word completion that's still wanted.
+// deadness is input state, not just a dim visual — spent dice refuse
+// to join words via drag, tap, or typing
 function updateDeadDice() {
 	const alive = new Uint8Array(CELLS);
 	const dfs = (ci, str, used, path) => {
@@ -163,9 +166,10 @@ function updateDeadDice() {
 		path.pop();
 	};
 	for (let i = 0; i < CELLS; i++) dfs(i, "", 1 << i, []);
+	for (let i = 0; i < CELLS; i++) deadDice[i] = alive[i] ? 0 : 1;
 	const dies = dieEls();
 	for (let i = 0; i < dies.length; i++) {
-		dies[i].classList.toggle("dead", !alive[i]);
+		dies[i].classList.toggle("dead", !!deadDice[i]);
 	}
 }
 
@@ -293,6 +297,7 @@ function dieEls() {
 function dieClick(i) {
 	if (state === "ready") startRun();
 	if (state !== "run") return;
+	if (deadDice[i]) return; // spent dice don't join words
 	const last = sel[sel.length - 1];
 	if (i === last) {
 		sel.pop();
@@ -325,7 +330,13 @@ boardEl.addEventListener("touchstart", (e) => {
 	const i = dieIndexAt(e.touches[0].clientX, e.touches[0].clientY);
 	if (i === -1) return;
 	if (state === "ready") startRun();
-	touchDrag = { preSel: sel.slice(), preGuess: guess, moved: false };
+	touchDrag = { start: i, preSel: sel.slice(), preGuess: guess, moved: false };
+	if (deadDice[i]) {
+		sel = []; // a spent die can't begin a word — the drag stays claimed
+		guess = "";
+		paintSelection();
+		return;
+	}
 	sel = [i];
 	guess = faces[i];
 	paintSelection();
@@ -338,11 +349,11 @@ boardEl.addEventListener("touchmove", (e) => {
 	if (i === -1 || i === sel[sel.length - 1]) return;
 	if (sel.length > 1 && i === sel[sel.length - 2]) {
 		sel.pop(); // slid back onto the previous die
-	} else if (ADJ[sel[sel.length - 1]].includes(i) && !sel.includes(i)) {
+	} else if (sel.length && ADJ[sel[sel.length - 1]].includes(i) && !sel.includes(i) && !deadDice[i]) {
 		sel.push(i);
 		touchDrag.moved = true;
 	} else {
-		return; // no jumping to far dice
+		return; // no jumping to far dice, and no dead dice
 	}
 	guess = sel.map((ci) => faces[ci]).join("");
 	paintSelection();
@@ -355,10 +366,10 @@ boardEl.addEventListener("touchend", (e) => {
 		submitGuess(); // a real drag — release submits the word
 	} else {
 		// a plain tap — put the selection back and re-run tap behavior
+		// on the die the gesture began on
 		sel = touchDrag.preSel;
 		guess = touchDrag.preGuess;
-		const i = dieIndexAt(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-		if (i !== -1) dieClick(i);
+		dieClick(touchDrag.start);
 	}
 	touchDrag = null;
 }, { passive: false });
@@ -386,7 +397,9 @@ function popLetter() {
 	paintSelection();
 }
 
-// any path spelling the current guess — keeps typing and tapping in sync
+// any path spelling the current guess — keeps typing and tapping in
+// sync. dead dice never route: any unfound word has a live path, so
+// this only fails for junk or already-found words
 function matchWord(str) {
 	if (!str) return null;
 	let result = null;
@@ -402,11 +415,15 @@ function matchWord(str) {
 			return;
 		}
 		for (const ni of ADJ[ci]) {
-			if (!(nextUsed & (1 << ni))) dfs(ni, nextPos, nextUsed, path);
+			if (nextUsed & (1 << ni)) continue;
+			if (deadDice[ni]) continue;
+			dfs(ni, nextPos, nextUsed, path);
 		}
 		path.pop();
 	};
-	for (let i = 0; i < CELLS && !result; i++) dfs(i, 0, 0, []);
+	for (let i = 0; i < CELLS && !result; i++) {
+		if (!deadDice[i]) dfs(i, 0, 0, []);
+	}
 	return result;
 }
 

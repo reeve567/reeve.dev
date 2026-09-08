@@ -308,6 +308,7 @@ const driver = `
 	score = 0;
 	guess = "";
 	sel = [];
+	updateDeadDice(); // refresh deadness for the swapped-in board
 	state = "ready";
 	startRun();
 	const fireTouch = (type, x) => {
@@ -396,6 +397,47 @@ const driver = `
 	}
 	endRun(); // stops the timer
 	console.log("T9 ok: dead dice track exhausted letters");
+
+	// T10: dead dice refuse to join words — via drag, tap, and typing
+	initDay("2007-07-07");
+	faces = known.slice();
+	renderBoard();
+	allWords = solveBoard(faces);
+	found = new Set();
+	score = 0;
+	guess = "";
+	sel = [];
+	state = "ready";
+	startRun();
+	guess = "lard";
+	submitGuess();
+	if (!found.has("lard")) throw new Error("T10: lard should submit");
+	// drag c-a-r, then over the dead d(3) — must not extend
+	fireTouch("touchstart", 0);
+	fireTouch("touchmove", 1);
+	fireTouch("touchmove", 6);
+	fireTouch("touchmove", 3); // dead die adjacent to r — refused
+	if (guess !== "car") throw new Error("T10: drag must skip dead dice, got '" + guess + "'");
+	fireTouch("touchmove", 2); // live die adjacent to r — still works
+	if (guess !== "cart") throw new Error("T10: live extension after a dead die should work");
+	fireTouch("touchend", 0);
+	if (!found.has("cart")) throw new Error("T10: cart should submit after the dead-skip drag");
+	// dragging FROM a dead die stays inert and doesn't phantom-select
+	guess = "";
+	sel = [];
+	fireTouch("touchstart", 3); // dead d
+	fireTouch("touchmove", 2); // live t — but the drag is inert
+	if (guess !== "") throw new Error("T10: dragging from a dead die must not build, got '" + guess + "'");
+	fireTouch("touchend", 2);
+	if (guess !== "") throw new Error("T10: releasing an inert drag must not tap-select");
+	// tapping a dead die does nothing
+	fireTouch("touchstart", 3);
+	fireTouch("touchend", 3);
+	if (guess !== "") throw new Error("T10: tapping a dead die must not select");
+	// typing reroutes around dead dice: "lard" is found, its only d is dead
+	if (matchWord("lard")) throw new Error("T10: matchWord must not route through dead dice");
+	endRun(); // stops the timer
+	console.log("T10 ok: dead dice refused by drag, tap, and typing");
 
 	console.log("SMOKE OK");
 })().catch((e) => {
