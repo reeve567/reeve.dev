@@ -102,7 +102,11 @@ for (let i = 0; i < CELLS; i++) {
 }
 
 // every word this board can spell — dictionary pruned to its letters,
-// then a prefix-pruned dfs over all paths
+// then a prefix-pruned dfs over all paths. the candidate and prefix
+// sets stay in module state so deadness tracking can reuse them
+let solverCandidates = new Set();
+let solverPrefixes = new Set();
+
 function solveBoard(faces) {
 	const have = {};
 	let letters = 0;
@@ -110,7 +114,7 @@ function solveBoard(faces) {
 		for (const ch of face) have[ch] = (have[ch] || 0) + 1;
 		letters += face.length;
 	}
-	const candidates = new Set();
+	solverCandidates = new Set();
 	for (const word of DICT) {
 		if (word.length < MIN_WORD || word.length > letters) continue;
 		const need = {};
@@ -122,23 +126,47 @@ function solveBoard(faces) {
 				break;
 			}
 		}
-		if (ok) candidates.add(word);
+		if (ok) solverCandidates.add(word);
 	}
-	const prefixes = new Set();
-	for (const word of candidates) {
-		for (let i = 1; i <= word.length; i++) prefixes.add(word.slice(0, i));
+	solverPrefixes = new Set();
+	for (const word of solverCandidates) {
+		for (let i = 1; i <= word.length; i++) solverPrefixes.add(word.slice(0, i));
 	}
 	const found = new Set();
 	const dfs = (ci, str, used) => {
 		const next = str + faces[ci];
-		if (!prefixes.has(next)) return;
-		if (next.length >= MIN_WORD && candidates.has(next)) found.add(next);
+		if (!solverPrefixes.has(next)) return;
+		if (next.length >= MIN_WORD && solverCandidates.has(next)) found.add(next);
 		for (const ni of ADJ[ci]) {
 			if (!(used & (1 << ni))) dfs(ni, next, used | (1 << ni));
 		}
 	};
 	for (let i = 0; i < CELLS; i++) dfs(i, "", 1 << i);
 	return found;
+}
+
+// gray out dice that no longer matter: a die is dead when no unfound
+// word can be spelled through it. runs the same prefix-pruned dfs,
+// marking the path of every word completion that's still wanted
+function updateDeadDice() {
+	const alive = new Uint8Array(CELLS);
+	const dfs = (ci, str, used, path) => {
+		const next = str + faces[ci];
+		if (!solverPrefixes.has(next)) return;
+		path.push(ci);
+		if (next.length >= MIN_WORD && solverCandidates.has(next) && !found.has(next)) {
+			for (const cell of path) alive[cell] = 1;
+		}
+		for (const ni of ADJ[ci]) {
+			if (!(used & (1 << ni))) dfs(ni, next, used | (1 << ni), path);
+		}
+		path.pop();
+	};
+	for (let i = 0; i < CELLS; i++) dfs(i, "", 1 << i, []);
+	const dies = dieEls();
+	for (let i = 0; i < dies.length; i++) {
+		dies[i].classList.toggle("dead", !alive[i]);
+	}
 }
 
 // ---- records: one per day, in localStorage ----
@@ -240,6 +268,7 @@ function initDay(dayStr) {
 	renderBoard();
 	renderWords();
 	paintSelection();
+	updateDeadDice();
 	updateStats();
 	showStartOverlay(record);
 }
@@ -396,6 +425,7 @@ function submitGuess() {
 		score += pts;
 		if (guess.length > longest.length) longest = guess;
 		hint("+" + pts + " " + guess, "good");
+		updateDeadDice();
 	}
 	guess = "";
 	sel = [];
@@ -437,6 +467,7 @@ function endRun() {
 	if (!practice) {
 		saveRecord(date, { score, words: found.size, longest, won });
 	}
+	updateDeadDice();
 	renderWords(true);
 	updateStats();
 	showEndOverlay(won);

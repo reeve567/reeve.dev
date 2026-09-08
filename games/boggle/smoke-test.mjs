@@ -362,6 +362,41 @@ const driver = `
 	endRun(); // stop the run's timer
 	console.log("T8 ok: drag, slide-back, taps, cancel");
 
+	// T9: dead dice — once every word spellable through a die is found,
+	// the die grays out. on the known board, d(3) only spells "lard";
+	// c(0) spells cat, cart, carte, carts, and clot
+	initDay("2006-06-06");
+	faces = known.slice();
+	renderBoard();
+	allWords = solveBoard(faces);
+	found = new Set();
+	score = 0;
+	guess = "";
+	sel = [];
+	state = "ready";
+	startRun();
+	updateDeadDice();
+	const dies = dieEls();
+	if (dies[3].classList.contains("dead")) throw new Error("T9: d die starts alive while lard is unfound");
+	if (dies[0].classList.contains("dead")) throw new Error("T9: c die starts alive");
+	guess = "lard";
+	submitGuess();
+	if (!found.has("lard")) throw new Error("T9: lard should have submitted");
+	if (!dies[3].classList.contains("dead")) throw new Error("T9: d die should gray after lard — its only word");
+	if (dies[0].classList.contains("dead")) throw new Error("T9: c die must stay alive while its words are unfound");
+	const cWords = ["cat", "cart", "carte", "carts", "clot"];
+	for (let i = 0; i < cWords.length; i++) {
+		guess = cWords[i];
+		submitGuess();
+		if (!found.has(cWords[i])) throw new Error("T9: expected to submit '" + cWords[i] + "'");
+		const isLast = i === cWords.length - 1;
+		if (dies[0].classList.contains("dead") !== isLast) {
+			throw new Error("T9: c die deadness wrong after " + cWords[i]);
+		}
+	}
+	endRun(); // stops the timer
+	console.log("T9 ok: dead dice track exhausted letters");
+
 	console.log("SMOKE OK");
 })().catch((e) => {
 	console.error("SMOKE FAILED:", e.message);

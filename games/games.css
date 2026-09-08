@@ -418,6 +418,10 @@ canvas.minimap {
 	color: var(--accent);
 }
 
+.die.dead {
+	opacity: 0.35;
+}
+
 .die.last {
 	border-color: var(--accent);
 	color: var(--accent);
