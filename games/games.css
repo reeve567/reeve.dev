@@ -387,6 +387,7 @@ canvas.minimap {
 	grid-template-columns: repeat(4, 1fr);
 	gap: 0.5rem;
 	max-width: 420px;
+	touch-action: none; /* the board is a drag surface, not a scroll surface */
 }
 
 .die {

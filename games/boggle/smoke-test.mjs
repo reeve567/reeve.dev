@@ -43,16 +43,16 @@ const mkEl = (tag) => {
 		tagName: tag || "DIV",
 		children: [],
 		firstChild: null,
-		listeners: [],
 		textContent: "",
 		disabled: false,
-		innerHTML: "",
-		classList: mkClassList(),
 		className: "",
+		classList: mkClassList(),
+		listeners: {},
 		addEventListener(type, fn) {
-			el.listeners.push(fn);
+			(el.listeners[type] = el.listeners[type] || []).push(fn);
 		},
 		appendChild(child) {
+			child.parentElement = el; // the drag handlers resolve dies by parent
 			el.children.push(child);
 			el.firstChild = el.children[0] || null;
 			return child;
@@ -120,6 +120,8 @@ globalThis.document = {
 		return elements[id];
 	},
 	createElement: (tag) => mkEl(tag),
+	// die index passed as the x coordinate keeps the drag tests lean
+	elementFromPoint: (x) => board.children[Math.floor(x)] ?? null,
 };
 
 // ---- driver: appended to game.js so it shares scope ----
@@ -294,6 +296,72 @@ const driver = `
 	if (guess !== "") throw new Error("T7: backspace should clear the guess");
 	endRun(); // leave no live timer — a stray interval would hang the test process
 	console.log("T7 ok: keyboard path — letters type during a run");
+
+	// T8: touch drag — slide through adjacent dice and release to
+	// submit; plain taps keep tap-to-build; sliding back undoes
+	initDay("2003-03-03");
+	faces = known.slice();
+	renderBoard();
+	allWords = solveBoard(faces);
+	par = Math.max(PAR_MIN, Math.round(allWords.size * PAR_FACTOR));
+	found = new Set();
+	score = 0;
+	guess = "";
+	sel = [];
+	state = "ready";
+	startRun();
+	const fireTouch = (type, x) => {
+		for (const fn of boardEl.listeners[type] || []) {
+			fn({
+				touches: [{ clientX: x, clientY: 0 }],
+				changedTouches: [{ clientX: x, clientY: 0 }],
+				cancelable: true,
+				preventDefault() {},
+			});
+		}
+	};
+	// drag c(0) → a(1) → r(6) → t(2): "cart", released → submitted
+	fireTouch("touchstart", 0);
+	if (state !== "run" || sel.length !== 1 || sel[0] !== 0) throw new Error("T8: touchstart should select and start the run");
+	fireTouch("touchmove", 1);
+	fireTouch("touchmove", 6);
+	if (guess !== "car") throw new Error("T8: dragging should build 'car', got '" + guess + "'");
+	fireTouch("touchmove", 0); // r(6) → t(2) is legal, but try an illegal jump first: 6 → 0 is not adjacent
+	if (guess !== "car") throw new Error("T8: illegal jumps must be ignored");
+	fireTouch("touchmove", 2);
+	if (guess !== "cart") throw new Error("T8: dragging should build 'cart'");
+	fireTouch("touchend", 0);
+	if (guess !== "" || !found.has("cart") || score !== 1) throw new Error("T8: release should submit the dragged word");
+	// sliding back undoes: c(0) → a(1) → t(2), back to a(1), out to t(2)
+	guess = "";
+	sel = [];
+	fireTouch("touchstart", 0);
+	fireTouch("touchmove", 1);
+	fireTouch("touchmove", 2);
+	if (guess !== "cat") throw new Error("T8: drag should build 'cat'");
+	fireTouch("touchmove", 1); // slide back onto the previous die
+	if (sel.length !== 2 || guess !== "ca") throw new Error("T8: sliding back should undo a step, got '" + guess + "'");
+	fireTouch("touchmove", 2);
+	fireTouch("touchend", 0); // release submits
+	if (guess !== "" || !found.has("cat") || score !== 2) throw new Error("T8: slide-back then release should score 'cat'");
+	// plain tap (no slide) on an adjacent die extends the selection
+	guess = "";
+	sel = [];
+	fireTouch("touchstart", 0); // select c
+	fireTouch("touchend", 0); // no movement — tap semantics: dieClick(0) on empty selection
+	if (guess !== "c" || sel.length !== 1) throw new Error("T8: plain tap should select the die, got '" + guess + "'");
+	fireTouch("touchstart", 1); // preSel is [0], touch a(1)
+	fireTouch("touchend", 1); // tap → dieClick(1) with sel [0]: adjacent, appends
+	if (guess !== "ca" || sel.length !== 2) throw new Error("T8: tap after tap should extend the path, got '" + guess + "'");
+	// touchcancel puts things back untouched
+	const holdSel = sel.slice();
+	fireTouch("touchstart", 6);
+	fireTouch("touchmove", 6); // extends the path mid-drag...
+	fireTouch("touchcancel", 6);
+	if (sel.length !== holdSel.length) throw new Error("T8: cancelled drag should restore the selection");
+	endRun(); // stop the run's timer
+	console.log("T8 ok: drag, slide-back, taps, cancel");
+
 	console.log("SMOKE OK");
 })().catch((e) => {
 	console.error("SMOKE FAILED:", e.message);

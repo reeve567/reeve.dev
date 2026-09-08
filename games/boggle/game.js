@@ -278,6 +278,70 @@ function dieClick(i) {
 	paintSelection();
 }
 
+// touch dragging: press a die, slide through adjacent letters, lift to
+// submit. sliding back along the path undoes a step; a plain tap (no
+// slide) falls back to the tap-to-build behavior
+let touchDrag = null;
+
+function dieIndexAt(x, y) {
+	const el = document.elementFromPoint(x, y);
+	if (!el || el.parentElement !== boardEl) return -1;
+	return Array.prototype.indexOf.call(boardEl.children, el);
+}
+
+boardEl.addEventListener("touchstart", (e) => {
+	if (state !== "ready" && state !== "run") return;
+	e.preventDefault();
+	if (touchDrag) return; // one finger at a time
+	const i = dieIndexAt(e.touches[0].clientX, e.touches[0].clientY);
+	if (i === -1) return;
+	if (state === "ready") startRun();
+	touchDrag = { preSel: sel.slice(), preGuess: guess, moved: false };
+	sel = [i];
+	guess = faces[i];
+	paintSelection();
+}, { passive: false });
+
+boardEl.addEventListener("touchmove", (e) => {
+	if (!touchDrag) return;
+	e.preventDefault();
+	const i = dieIndexAt(e.touches[0].clientX, e.touches[0].clientY);
+	if (i === -1 || i === sel[sel.length - 1]) return;
+	if (sel.length > 1 && i === sel[sel.length - 2]) {
+		sel.pop(); // slid back onto the previous die
+	} else if (ADJ[sel[sel.length - 1]].includes(i) && !sel.includes(i)) {
+		sel.push(i);
+		touchDrag.moved = true;
+	} else {
+		return; // no jumping to far dice
+	}
+	guess = sel.map((ci) => faces[ci]).join("");
+	paintSelection();
+}, { passive: false });
+
+boardEl.addEventListener("touchend", (e) => {
+	if (!touchDrag) return;
+	if (e.cancelable) e.preventDefault();
+	if (touchDrag.moved && sel.length >= 2) {
+		submitGuess(); // a real drag — release submits the word
+	} else {
+		// a plain tap — put the selection back and re-run tap behavior
+		sel = touchDrag.preSel;
+		guess = touchDrag.preGuess;
+		const i = dieIndexAt(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+		if (i !== -1) dieClick(i);
+	}
+	touchDrag = null;
+}, { passive: false });
+
+boardEl.addEventListener("touchcancel", () => {
+	if (!touchDrag) return;
+	sel = touchDrag.preSel; // an aborted drag changes nothing
+	guess = touchDrag.preGuess;
+	touchDrag = null;
+	paintSelection();
+}, { passive: false });
+
 function addLetter(ch) {
 	if (state === "ready") startRun();
 	if (state !== "run") return;
