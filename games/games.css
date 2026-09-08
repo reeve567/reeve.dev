@@ -509,6 +509,13 @@ canvas.minimap {
 	opacity: 0.8;
 }
 
+a.word-chip.missed:hover,
+a.word-chip.missed:focus-visible {
+	color: var(--accent);
+	border-color: var(--accent);
+	opacity: 1;
+}
+
 .missed-label {
 	width: 100%;
 	margin-top: 0.5rem;

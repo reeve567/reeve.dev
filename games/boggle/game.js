@@ -616,9 +616,16 @@ function paintSelection() {
 
 function renderWords(withMissed) {
 	wordsEl.innerHTML = "";
-	const addChip = (word, cls) => {
-		const chip = document.createElement("span");
-		chip.className = "word-chip" + (cls ? " " + cls : "");
+	const addChip = (word, missed) => {
+		// missed words link out to wiktionary — the oddballs (rhus,
+		// sots, shmo) deserve a definition
+		const chip = missed ? document.createElement("a") : document.createElement("span");
+		chip.className = "word-chip" + (missed ? " missed" : "");
+		if (missed) {
+			chip.href = "https://en.wiktionary.org/wiki/" + encodeURIComponent(word);
+			chip.target = "_blank";
+			chip.rel = "noopener";
+		}
 		chip.textContent = word;
 		wordsEl.appendChild(chip);
 	};
@@ -628,9 +635,9 @@ function renderWords(withMissed) {
 		if (missed.length) {
 			const label = document.createElement("p");
 			label.className = "missed-label";
-			label.textContent = "missed (" + missed.length + ")";
+			label.textContent = "missed (" + missed.length + ") — tap a word to define it";
 			wordsEl.appendChild(label);
-			for (const word of missed) addChip(word, "missed");
+			for (const word of missed) addChip(word, true);
 		}
 	}
 }
