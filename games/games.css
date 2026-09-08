@@ -1,0 +1,515 @@
+/*
+ * Shared styles for everything under /games — pinched from the main
+ * site's terminal look. Sections:
+ *   base      — terminal chrome every games page uses
+ *   game bits — game layout, HUD panels, overlays (game-agnostic UI)
+ *   paper     — paper's board and minimap
+ * Future games (word games etc.) should reuse the base and game-bit
+ * sections and keep anything game-specific last, scoped to its page.
+ */
+
+:root {
+	--bg: #000000;
+	--fg: #ff7a00;
+	--fg-dim: #b35a0c;
+	--accent: #ffae42;
+	--border: #3a2410;
+	--key-bg: #1a1208;
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html,
+body {
+	min-height: 100%;
+	background: var(--bg);
+	color: var(--fg);
+	font-family: "JetBrains Mono", "SFMono-Regular", "Consolas", "Liberation Mono", "Menlo", monospace;
+	font-size: 16px;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+}
+
+body {
+	padding: 2rem 1.5rem 4rem;
+}
+
+a {
+	color: var(--accent);
+	text-decoration: none;
+	border-bottom: 1px solid transparent;
+	transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+a:hover,
+a:focus-visible {
+	border-bottom-color: var(--accent);
+}
+
+.terminal {
+	width: 100%;
+	max-width: 980px;
+	margin: 0 auto;
+}
+
+.header {
+	margin-bottom: 1.5rem;
+}
+
+.name {
+	font-size: 1.6rem;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+}
+
+.tagline {
+	color: var(--fg);
+	margin-top: 0.25rem;
+}
+
+.links {
+	margin: 0.5rem 0 1.5rem 0;
+}
+
+.links ul {
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+
+.links li::before {
+	content: "-> ";
+	color: var(--fg-dim);
+	margin-right: 0.25rem;
+}
+
+.cursor {
+	color: var(--fg);
+	animation: blink 1.1s steps(1) infinite;
+}
+
+@keyframes blink {
+	50% {
+		opacity: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.cursor {
+		animation: none;
+	}
+}
+
+.back {
+	margin-bottom: 1.5rem;
+	color: var(--fg-dim);
+	font-size: 0.9rem;
+}
+
+.back a::before {
+	content: "<- ";
+}
+
+h2 {
+	font-size: 1.1rem;
+	font-weight: 700;
+	color: var(--accent);
+	margin-bottom: 0.5rem;
+}
+
+h2::before {
+	content: "## ";
+	color: var(--fg-dim);
+	font-weight: 400;
+}
+
+.note {
+	color: var(--fg-dim);
+	font-size: 0.85rem;
+	margin: 0.25rem 0 0.75rem;
+}
+
+kbd.key {
+	display: inline-block;
+	padding: 0.05rem 0.4rem;
+	border: 1px solid var(--accent);
+	border-radius: 3px;
+	background: var(--key-bg);
+	color: var(--accent);
+	font-family: inherit;
+	font-size: 0.85rem;
+	line-height: 1.2;
+	white-space: nowrap;
+}
+
+.footer {
+	margin-top: 2rem;
+	color: var(--fg-dim);
+	font-size: 0.85rem;
+}
+
+/* ---- game bits: layout, HUD, overlays (shared UI) ---- */
+
+.game-layout {
+	display: flex;
+	gap: 1.5rem;
+	align-items: flex-start;
+	margin: 1.5rem 0 0;
+}
+
+.canvas-wrap {
+	position: relative;
+	flex: 1;
+	min-width: 0;
+}
+
+/* ---- paper: board and minimap ---- */
+
+canvas.game {
+	display: block;
+	background: #060402;
+	border: 1px solid var(--border);
+	touch-action: none;
+}
+
+canvas.minimap {
+	position: absolute;
+	left: 10px;
+	bottom: 10px;
+	width: 128px;
+	height: 128px;
+	background: #060402;
+	border: 1px solid var(--border);
+	image-rendering: pixelated;
+	pointer-events: none;
+	opacity: 0.92;
+	z-index: 1;
+}
+
+.hud {
+	width: 272px;
+	flex-shrink: 0;
+}
+
+.controls {
+	margin-top: 0.6rem;
+	color: var(--fg-dim);
+	font-size: 0.8rem;
+}
+
+/* ---- standings ---- */
+
+.standings {
+	display: flex;
+	flex-direction: column;
+	gap: 0.55rem;
+	margin-bottom: 1.25rem;
+}
+
+.standing {
+	font-size: 0.85rem;
+}
+
+.standing.dead {
+	opacity: 0.4;
+}
+
+.standing .row1 {
+	display: flex;
+	align-items: center;
+	gap: 0.45rem;
+}
+
+.standing .chip {
+	width: 0.7em;
+	height: 0.7em;
+	flex-shrink: 0;
+}
+
+.standing .pname {
+	font-weight: 500;
+}
+
+.standing .pct {
+	margin-left: auto;
+}
+
+.standing .kills {
+	color: var(--fg-dim);
+	font-size: 0.75rem;
+}
+
+.standing .bar {
+	display: block;
+	margin-top: 0.05rem;
+	font-size: 0.75rem;
+	letter-spacing: 0.05em;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.standing .bar .off {
+	color: var(--fg-dim);
+	opacity: 0.45;
+}
+
+/* ---- feed ---- */
+
+.feed {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1rem;
+	min-height: 9.5rem;
+	font-size: 0.85rem;
+}
+
+.feed-line::before {
+	content: "> ";
+	color: var(--fg-dim);
+}
+
+/* ---- overlay ---- */
+
+.overlay {
+	position: absolute;
+	inset: 0;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	background: rgba(0, 0, 0, 0.85);
+	padding: 1rem;
+	z-index: 2;
+}
+
+.overlay.show {
+	display: flex;
+}
+
+.ov-title {
+	font-size: 1.7rem;
+	font-weight: 700;
+	color: var(--accent);
+}
+
+.ov-line {
+	margin-top: 0.6rem;
+	color: var(--fg);
+}
+
+.ov-stats {
+	margin-top: 0.75rem;
+	color: var(--fg-dim);
+	font-size: 0.85rem;
+}
+
+.ov-go {
+	margin-top: 1.25rem;
+	color: var(--accent);
+	font-size: 0.9rem;
+}
+
+@media (max-width: 760px) {
+	.game-layout {
+		flex-direction: column;
+	}
+
+	.hud {
+		width: 100%;
+	}
+
+	.feed {
+		min-height: 0;
+	}
+}
+
+@media (max-width: 640px) {
+	body {
+		font-size: 14px;
+		padding: 1.5rem 1rem 3rem;
+	}
+
+	.name {
+		font-size: 1.4rem;
+	}
+}
+
+/* ---- boggle: the daily board ---- */
+
+.boggle-wrap {
+	position: relative;
+	flex: 1;
+	min-width: 0;
+}
+
+.b-date {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-bottom: 0.9rem;
+	min-height: 2rem;
+}
+
+.b-date .date-label {
+	flex: 1;
+	color: var(--fg-dim);
+}
+
+.b-btn {
+	font-family: inherit;
+	font-size: 0.85rem;
+	padding: 0.25rem 0.75rem;
+	background: var(--key-bg);
+	border: 1px solid var(--border);
+	color: var(--accent);
+	cursor: pointer;
+	transition: border-color 0.15s ease;
+}
+
+.b-btn:hover:not(:disabled),
+.b-btn:focus-visible {
+	border-color: var(--accent);
+	outline: none;
+}
+
+.b-btn:disabled {
+	opacity: 0.3;
+	cursor: default;
+}
+
+.board {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 0.5rem;
+	max-width: 420px;
+}
+
+.die {
+	font-family: inherit;
+	font-size: 1.7rem;
+	font-weight: 500;
+	text-transform: uppercase;
+	aspect-ratio: 1;
+	background: var(--key-bg);
+	border: 1px solid var(--border);
+	color: var(--fg);
+	cursor: pointer;
+	user-select: none;
+	-webkit-user-select: none;
+	touch-action: manipulation;
+	transition: background 0.1s ease, border-color 0.1s ease, color 0.1s ease;
+}
+
+.die.wide {
+	font-size: 1.25rem;
+	letter-spacing: 0.05em;
+	border-color: var(--fg-dim);
+}
+
+.die.path {
+	background: #2b1a06;
+	border-color: var(--fg-dim);
+	color: var(--accent);
+}
+
+.die.last {
+	border-color: var(--accent);
+	color: var(--accent);
+}
+
+.guess-line {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	margin-top: 0.9rem;
+	min-height: 2rem;
+	font-size: 1.35rem;
+	color: var(--accent);
+	letter-spacing: 0.08em;
+}
+
+.guess-line .guess {
+	min-height: inherit; /* keep the line steady while empty */
+}
+
+.guess-line .guess.bad {
+	color: #ff5f5f;
+}
+
+.guess-hint {
+	min-height: 1.4rem;
+	font-size: 0.85rem;
+	color: var(--fg-dim);
+}
+
+.guess-hint.good {
+	color: var(--accent);
+}
+
+.guess-hint.bad {
+	color: #ff5f5f;
+}
+
+.b-keys {
+	display: flex;
+	gap: 0.5rem;
+	margin-top: 0.4rem;
+}
+
+.b-stats {
+	font-size: 0.95rem;
+	line-height: 1.7;
+}
+
+.b-stats .b-score {
+	font-size: 1.4rem;
+	font-weight: 700;
+}
+
+.b-stats .b-clock {
+	float: right;
+	font-size: 1.2rem;
+	color: var(--fg);
+}
+
+.b-stats .b-clock.low {
+	color: #ff5f5f;
+}
+
+.word-list {
+	max-height: 300px;
+	overflow-y: auto;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+	align-content: flex-start;
+}
+
+.word-chip {
+	font-size: 0.85rem;
+	padding: 0.05rem 0.4rem;
+	border: 1px solid var(--fg-dim);
+	color: var(--fg);
+}
+
+.word-chip.missed {
+	color: var(--fg-dim);
+	border-color: var(--border);
+	opacity: 0.8;
+}
+
+.missed-label {
+	width: 100%;
+	margin-top: 0.5rem;
+	color: var(--fg-dim);
+	font-size: 0.8rem;
+}
+
+.ov-actions {
+	margin-top: 1rem;
+}

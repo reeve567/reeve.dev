@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>paper</title>
+	<meta name="description" content="claim territory and cut off the bots in this paper.io-style game" />
+	<meta name="robots" content="index, follow" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+	<link rel="stylesheet" href="../games.css" />
+</head>
+
+<body>
+	<main class="terminal">
+		<div class="header">
+			<h1 class="name">paper</h1>
+			<p class="tagline">claim territory, cut off the bots<span class="cursor" aria-hidden="true">_</span></p>
+		</div>
+
+		<p class="back"><a href="../">games</a></p>
+
+		<div class="game-layout">
+			<div class="canvas-wrap">
+				<canvas id="game" class="game" aria-label="paper — territory game board"></canvas>
+				<canvas id="minimap" class="minimap" aria-hidden="true"></canvas>
+				<div class="overlay" id="overlay"></div>
+				<p class="controls">arrows / wasd &middot; swipe on mobile &middot; <kbd class="key">p</kbd> pause &middot;
+					<kbd class="key">r</kbd> restart</p>
+			</div>
+
+			<aside class="hud">
+				<h2>standings</h2>
+				<div class="standings" id="standings"></div>
+				<h2>feed</h2>
+				<div class="feed" id="feed"></div>
+				<p class="note">first to 25% wins &middot; crossing a trail cuts its owner &middot; loops claim
+					enclosed enemy land &mdash; unless someone stands in it &middot; territory split off from
+					the rest crumbles to no-man's-land &middot; your own trail and walls kill</p>
+			</aside>
+		</div>
+	</main>
+
+	<script src="game.js"></script>
+</body>
+
+</html>
