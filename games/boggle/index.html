@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>boggle</title>
+	<meta name="description" content="daily boggle — the same board for everyone, rolled from the date" />
+	<meta name="robots" content="index, follow" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+	<link rel="stylesheet" href="../games.css" />
+</head>
+
+<body>
+	<main class="terminal">
+		<div class="header">
+			<h1 class="name">boggle</h1>
+			<p class="tagline">find the words, beat the par<span class="cursor" aria-hidden="true">_</span></p>
+		</div>
+
+		<p class="back"><a href="../">games</a></p>
+
+		<div class="game-layout">
+			<div class="boggle-wrap">
+				<div class="b-date">
+					<button class="b-btn" id="prev-day" title="previous day">&#8592;</button>
+					<span class="date-label" id="date-label"></span>
+					<button class="b-btn" id="next-day" title="next day">&#8594;</button>
+				</div>
+
+				<div class="board" id="board"></div>
+
+				<div class="guess-line"><span class="guess" id="guess"></span></div>
+				<p class="guess-hint" id="hint"></p>
+
+				<div class="b-keys">
+					<button class="b-btn" id="key-back">back</button>
+					<button class="b-btn" id="key-enter">enter</button>
+				</div>
+
+				<p class="controls">type or tap letters &middot; enter submits &middot; backspace deletes &middot;
+					arrow keys change days</p>
+
+				<div class="overlay" id="overlay"></div>
+			</div>
+
+			<aside class="hud">
+				<h2>today</h2>
+				<div class="b-stats" id="daystats"></div>
+				<h2>words</h2>
+				<div class="word-list" id="words"></div>
+				<h2>all-time</h2>
+				<div class="b-stats dim" id="allstats"></div>
+				<p class="note">3+ letters &middot; every die used once &middot; some days roll a qu die
+					&mdash; it spells q + u, one tap of q &middot; first score of the day is the one that
+					counts</p>
+			</aside>
+		</div>
+	</main>
+
+	<script src="words.js"></script>
+	<script src="game.js"></script>
+</body>
+
+</html>
