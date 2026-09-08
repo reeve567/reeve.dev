@@ -36,6 +36,7 @@ body {
 
 body {
 	padding: 2rem 1.5rem 4rem;
+	overscroll-behavior-y: contain; /* game boards: no pull-to-refresh mid-play */
 }
 
 a {
@@ -402,7 +403,7 @@ canvas.minimap {
 	cursor: pointer;
 	user-select: none;
 	-webkit-user-select: none;
-	touch-action: manipulation;
+	touch-action: none; /* set on the die itself — some browsers don't inherit from .board */
 	transition: background 0.1s ease, border-color 0.1s ease, color 0.1s ease;
 }
 
