@@ -343,6 +343,29 @@ const DRAG_DIRS = [
 	[1, -1],
 ];
 
+// the backtrack channel: dragging the finger back on top of any
+// letter already in the word cuts the word back to that letter.
+// deliberately soft — no commit threshold, because undoing should
+// never be as hard as doing — but the stroke must be heading clearly
+// toward the letter, and it only runs after the forward stroke found
+// nothing to take, so corner-cutting forward drags that transit old
+// letters never misfire
+function cutBackToPath(x, y, dx, dy, pitch) {
+	if (sel.length < 2) return -1;
+	const net = Math.hypot(dx, dy);
+	if (net < pitch * 0.15) return -1;
+	const i = dieFromPoint(x, y);
+	if (i === -1) return -1;
+	const k = sel.indexOf(i);
+	if (k === -1 || k >= sel.length - 1) return -1;
+	const last = sel[sel.length - 1];
+	const toX = ((i % SIZE) - (last % SIZE)) * pitch;
+	const toY = (((i / SIZE) | 0) - ((last / SIZE) | 0)) * pitch;
+	const dot = (dx * toX + dy * toY) / (net * Math.hypot(toX, toY));
+	if (dot < 0.85) return -1;
+	return k;
+}
+
 // drag intent reads the stroke, not the address: the net finger
 // travel since the last commit decides the next die. two gates keep
 // it honest — the net stroke must be long enough that a heading has
@@ -351,7 +374,9 @@ const DRAG_DIRS = [
 // distance, so a corner press with a short stroke can't select the
 // neighbor while still sitting inside it. the anchor resets on every
 // commit so a parked finger never re-fires; long strokes chain
-// roughly one die per cell of travel for fast swipes
+// roughly one die per cell of travel for fast swipes. when the
+// forward stroke has nothing to take, the drag falls back to the
+// backtrack channel above
 function dragByIntent(x, y) {
 	if (!touchDrag || !sel.length) return false;
 	const rect = boardEl.getBoundingClientRect();
@@ -361,40 +386,51 @@ function dragByIntent(x, y) {
 	const dx = x - touchDrag.markX;
 	const dy = y - touchDrag.markY;
 	const total = Math.hypot(dx, dy);
-	if (total < commit) return false;
-	const oct = ((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) % 8) + 8) % 8;
-	const dcol = DRAG_DIRS[oct][0];
-	const drow = DRAG_DIRS[oct][1];
 	let acted = false;
-	let consumed = 0;
-	while (total - consumed >= (acted ? pitch : commit)) {
-		const last = sel[sel.length - 1];
-		const col = last % SIZE;
-		const row = (last / SIZE) | 0;
-		const cx = rect.left + (col + 0.5) * pitch;
-		const cy = rect.top + (row + 0.5) * pitch;
-		if (Math.hypot(x - cx, y - cy) < exitGate) break; // still inside the square
-		const nCol = col + dcol;
-		const nRow = row + drow;
-		if (nCol < 0 || nCol >= SIZE || nRow < 0 || nRow >= SIZE) break;
-		const ni = nRow * SIZE + nCol;
-		if (sel.length > 1 && ni === sel[sel.length - 2]) {
-			sel.pop(); // dragged back along the path
-			acted = true;
-		} else if (!sel.includes(ni) && !deadDice[ni]) {
-			sel.push(ni);
-			acted = true;
-		} else {
-			break;
+	if (total >= commit) {
+		const oct = ((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) % 8) + 8) % 8;
+		const dcol = DRAG_DIRS[oct][0];
+		const drow = DRAG_DIRS[oct][1];
+		let consumed = 0;
+		while (total - consumed >= (acted ? pitch : commit)) {
+			const last = sel[sel.length - 1];
+			const col = last % SIZE;
+			const row = (last / SIZE) | 0;
+			const cx = rect.left + (col + 0.5) * pitch;
+			const cy = rect.top + (row + 0.5) * pitch;
+			if (Math.hypot(x - cx, y - cy) < exitGate) break; // still inside the square
+			const nCol = col + dcol;
+			const nRow = row + drow;
+			if (nCol < 0 || nCol >= SIZE || nRow < 0 || nRow >= SIZE) break;
+			const ni = nRow * SIZE + nCol;
+			if (sel.length > 1 && ni === sel[sel.length - 2]) {
+				sel.pop(); // dragged back along the path
+				acted = true;
+			} else if (!sel.includes(ni) && !deadDice[ni]) {
+				sel.push(ni);
+				acted = true;
+			} else {
+				break;
+			}
+			consumed += pitch;
 		}
-		consumed += pitch;
 	}
 	if (acted) {
 		touchDrag.markX = x;
 		touchDrag.markY = y;
 		touchDrag.moved = true;
+		return true;
 	}
-	return acted;
+	// nothing forward to take — try cutting the word back instead
+	const k = cutBackToPath(x, y, dx, dy, pitch);
+	if (k !== -1) {
+		sel = sel.slice(0, k + 1);
+		touchDrag.markX = x;
+		touchDrag.markY = y;
+		touchDrag.moved = true;
+		return true;
+	}
+	return false;
 }
 
 boardEl.addEventListener("touchstart", (e) => {

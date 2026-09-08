@@ -578,6 +578,52 @@ const driver = `
 	endRun(); // stops the timer
 	console.log("T14 ok: strokes must exit the square before committing");
 
+	// T15: backtracking — dragging back onto any letter already in
+	// the word cuts the word back to that letter. bent paths (where
+	// the direction snap can't reach the previous die) still cut, and
+	// forward drags that transit old letters must not
+	initDay("2013-12-25");
+	faces = known.slice();
+	renderBoard();
+	allWords = solveBoard(faces);
+	found = new Set();
+	score = 0;
+	guess = "";
+	sel = [];
+	updateDeadDice();
+	state = "ready";
+	startRun();
+	// mid-word: touched down around r(6), path is c-a-r-t
+	fireTouchXY("touchstart", 250, 150);
+	sel = [0, 1, 2, 6];
+	guess = "cart";
+	// drag back over a(1) — the path bends there, so the direction
+	// snap points at a used die that isn't the previous one; the cut
+	// channel must truncate the word to "ca"
+	fireTouchXY("touchmove", 145, 95);
+	if (sel.join(",") !== "0,1" || guess !== "ca") {
+		throw new Error("T15: bent-path backtrack should cut to the dragged letter, got " + JSON.stringify(sel) + " '" + guess + "'");
+	}
+	// keep dragging back over c(0) — cuts further, to "c"
+	fireTouchXY("touchmove", 55, 55);
+	if (sel.join(",") !== "0" || guess !== "c") throw new Error("T15: continued backtrack should cut further back");
+	fireTouchXY("touchend", 55, 55); // releases with a 1-die path — tap fallback, word still "c"
+	// forward guard: from a(1) dragging southwest toward l(4) passes
+	// over c(0)'s box — under commit it must not cut, and the
+	// committed stroke must append l(4), not truncate
+	fireTouchXY("touchstart", 150, 50);
+	sel = [0, 1];
+	guess = "ca";
+	fireTouchXY("touchmove", 95, 90); // over c(0), stroke hints southwest, under commit
+	if (sel.join(",") !== "0,1") throw new Error("T15: corner transit under commit must not cut");
+	fireTouchXY("touchmove", 110, 130); // committed southwest — appends l(4)
+	if (sel.join(",") !== "0,1,4" || guess !== "cal") {
+		throw new Error("T15: committed forward stroke must still append, got " + JSON.stringify(sel) + " '" + guess + "'");
+	}
+	fireTouchXY("touchend", 110, 130); // submits "cal" — too short, quietly clears
+	endRun(); // stops the timer
+	console.log("T15 ok: backtrack cuts, forward transits don't");
+
 	console.log("SMOKE OK");
 })().catch((e) => {
 	console.error("SMOKE FAILED:", e.message);
