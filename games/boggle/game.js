@@ -343,47 +343,50 @@ const DRAG_DIRS = [
 	[1, -1],
 ];
 
-// extend (or backtrack) the path by intent: if the finger has left
-// the current die's zone, snap its direction to the nearest diagonal
-// or orthogonal neighbor and take it. repeats a few times per move
-// event so fast swipes don't skip dice. backtrack needs hysteresis —
-// the finger must travel nearly to the previous die's center to pop,
-// otherwise a finger parked between two cells oscillates uselessly.
-// returns whether the path changed
+// drag intent reads the stroke, not the address: the net finger
+// travel since the last commit decides the next die. once enough
+// distance accumulates, the heading snaps to the nearest of the 8
+// neighbors and commits. arcing strokes toward a diagonal dip
+// sideways first — under threshold, they don't fire until the net
+// direction settles; a parked finger can never re-fire either, since
+// the anchor resets on every commit. long strokes chain roughly one
+// die per cell of travel for fast swipes
 function dragByIntent(x, y) {
-	const rect = boardEl.getBoundingClientRect();
-	const pitch = rect.width / SIZE;
-	const pushZone = pitch * 0.55;
-	const popZone = pitch * 0.95;
+	if (!touchDrag || !sel.length) return false;
+	const pitch = boardEl.getBoundingClientRect().width / SIZE;
+	const commit = pitch * 0.7;
+	const dx = x - touchDrag.markX;
+	const dy = y - touchDrag.markY;
+	const total = Math.hypot(dx, dy);
+	if (total < commit) return false;
+	const oct = ((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) % 8) + 8) % 8;
+	const dcol = DRAG_DIRS[oct][0];
+	const drow = DRAG_DIRS[oct][1];
 	let acted = false;
-	for (let hop = 0; hop < 4; hop++) {
+	let consumed = 0;
+	while (total - consumed >= (acted ? pitch : commit)) {
 		const last = sel[sel.length - 1];
-		if (last === undefined) return acted;
 		const col = last % SIZE;
 		const row = (last / SIZE) | 0;
-		const cx = rect.left + (col + 0.5) * pitch;
-		const cy = rect.top + (row + 0.5) * pitch;
-		const dx = x - cx;
-		const dy = y - cy;
-		const dist = Math.hypot(dx, dy);
-		if (dist < pushZone) return acted; // still inside the die's zone
-		const oct = ((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) % 8) + 8) % 8;
-		const nCol = col + DRAG_DIRS[oct][0];
-		const nRow = row + DRAG_DIRS[oct][1];
-		if (nCol < 0 || nCol >= SIZE || nRow < 0 || nRow >= SIZE) return acted;
+		const nCol = col + dcol;
+		const nRow = row + drow;
+		if (nCol < 0 || nCol >= SIZE || nRow < 0 || nRow >= SIZE) break;
 		const ni = nRow * SIZE + nCol;
 		if (sel.length > 1 && ni === sel[sel.length - 2]) {
-			if (dist < popZone) return acted; // barely left the die — not a real backtrack
 			sel.pop(); // dragged back along the path
-			touchDrag.moved = true;
 			acted = true;
 		} else if (!sel.includes(ni) && !deadDice[ni]) {
 			sel.push(ni);
-			touchDrag.moved = true;
 			acted = true;
 		} else {
-			return acted;
+			break;
 		}
+		consumed += pitch;
+	}
+	if (acted) {
+		touchDrag.markX = x;
+		touchDrag.markY = y;
+		touchDrag.moved = true;
 	}
 	return acted;
 }
@@ -392,10 +395,12 @@ boardEl.addEventListener("touchstart", (e) => {
 	if (state !== "ready" && state !== "run") return;
 	e.preventDefault();
 	if (touchDrag) return; // one finger at a time
-	const i = dieFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+	const x = e.touches[0].clientX;
+	const y = e.touches[0].clientY;
+	const i = dieFromPoint(x, y);
 	if (i === -1) return;
 	if (state === "ready") startRun();
-	touchDrag = { start: i, preSel: sel.slice(), preGuess: guess, moved: false };
+	touchDrag = { start: i, markX: x, markY: y, preSel: sel.slice(), preGuess: guess, moved: false };
 	if (deadDice[i]) {
 		sel = []; // a spent die can't begin a word — the drag stays claimed
 		guess = "";
@@ -410,35 +415,13 @@ boardEl.addEventListener("touchstart", (e) => {
 boardEl.addEventListener("touchmove", (e) => {
 	if (!touchDrag) return;
 	e.preventDefault();
-	const x = e.touches[0].clientX;
-	const y = e.touches[0].clientY;
-	// heading decides first: a diagonal drag cuts through an orthogonal
-	// neighbor's box on the way to the shared corner, and the finger's
-	// direction — not the box it happens to be in — tells us which die
-	// is meant
-	if (dragByIntent(x, y)) {
+	// the stroke is the whole story: net travel since the last commit
+	// decides the next die. anything slower or shallower than the
+	// commit threshold waits — a finger crossing an adjacent die's box
+	// mid-arc is passing through, not selecting
+	if (dragByIntent(e.touches[0].clientX, e.touches[0].clientY)) {
 		guess = sel.map((ci) => faces[ci]).join("");
 		paintSelection();
-		return;
-	}
-	// hover fallback for deliberate, on-the-die drags
-	const i = dieFromPoint(x, y);
-	const last = sel[sel.length - 1];
-	if (i !== -1 && i !== last) {
-		let acted = false;
-		if (last !== undefined && sel.length > 1 && i === sel[sel.length - 2]) {
-			sel.pop(); // slid back onto the previous die
-			touchDrag.moved = true;
-			acted = true;
-		} else if (last !== undefined && ADJ[last].includes(i) && !sel.includes(i) && !deadDice[i]) {
-			sel.push(i);
-			touchDrag.moved = true;
-			acted = true;
-		}
-		if (acted) {
-			guess = sel.map((ci) => faces[ci]).join("");
-			paintSelection();
-		}
 	}
 }, { passive: false });
 

@@ -465,15 +465,16 @@ const driver = `
 	// between c(0), a(1), l(4), a(5) sits at (100,100)
 	fireTouchXY("touchstart", 50, 50);
 	if (sel.length !== 1 || sel[0] !== 0) throw new Error("T11: touchstart should select die 0");
-	// finger at (95,95): still inside die 0's box, but moving toward the
-	// corner — intent should snap to the diagonal a(5)
-	fireTouchXY("touchmove", 95, 95);
+	// finger at (98,103): past the commit threshold heading diagonally,
+	// and physically inside l(4)'s box — the heading must take a(5)
+	fireTouchXY("touchmove", 98, 103);
 	if (sel.length !== 2 || sel[1] !== 5) throw new Error("T11: corner-cutting diagonal should select die 5, got " + JSON.stringify(sel));
 	if (guess !== "ca") throw new Error("T11: diagonal drag should build 'ca', got '" + guess + "'");
-	// dragging back toward die 0 by direction undoes the step
-	fireTouchXY("touchmove", 60, 60);
+	// dragging back toward die 0 by direction undoes the step — a real
+	// backtrack travels a full cell of net reverse stroke
+	fireTouchXY("touchmove", 30, 30);
 	if (sel.length !== 1 || sel[0] !== 0) throw new Error("T11: reverse drag should undo the diagonal step");
-	if (guess !== "c") throw new Error("T11: undo should leave 'c', got '" + guess + "'");
+	if (guess !== "c") throw new Error("T11: undo should leave 'c', got '" + guess + "'");;
 	// a fast horizontal swipe chains through multiple dice per event:
 	// from die 0's center to (260, 60) points east of c → a → t
 	fireTouchXY("touchmove", 260, 60);
@@ -504,14 +505,51 @@ const driver = `
 	if (guess !== "ca") throw new Error("T12: diagonal transit should build 'ca', got '" + guess + "'");
 	fireTouchXY("touchend", 115, 96); // release submits "ca" — too short, quietly clears
 	if (guess !== "" || sel.length) throw new Error("T12: release should clear the gesture");
-	// a finger clearly heading east into a(1) still takes a(1)
-	guess = "";
-	sel = [];
+	// a finger clearly heading east into a(1) takes a(1) once the
+	// stroke has enough net travel to commit
 	fireTouchXY("touchstart", 50, 50);
-	fireTouchXY("touchmove", 115, 55);
+	fireTouchXY("touchmove", 135, 55);
 	if (sel[1] !== 1) throw new Error("T12: eastward drag must take die 1, got " + JSON.stringify(sel));
 	endRun(); // stops the timer
 	console.log("T12 ok: headings outrank boxes in transit");
+
+	// T13: the field report — dragging the diagonal of a 2x2 block
+	// (R E over S H) with an arcing stroke used to light all four
+	// dice: position-relative direction read the arc's dip as moves
+	// onto the side dice. net-stroke intent keeps it to the diagonal,
+	// whichever way the arc bulges
+	initDay("2011-11-11");
+	faces = known.slice();
+	renderBoard();
+	allWords = solveBoard(faces);
+	found = new Set();
+	score = 0;
+	guess = "";
+	sel = [];
+	updateDeadDice();
+	state = "ready";
+	startRun();
+	// south-dipping arc: press c(0), dip toward l(4)'s box, then
+	// settle the heading toward a(5)
+	fireTouchXY("touchstart", 50, 50);
+	fireTouchXY("touchmove", 60, 110); // 61px net — under the commit, nothing fires
+	if (sel.length !== 1 || sel[0] !== 0) throw new Error("T13: arc dip must not commit a side die, got " + JSON.stringify(sel));
+	fireTouchXY("touchmove", 105, 125); // net settles diagonal
+	if (sel.join(",") !== "0,5") throw new Error("T13: settled arc must take the diagonal, got " + JSON.stringify(sel));
+	fireTouchXY("touchmove", 130, 150); // settle on a(5)
+	if (guess !== "ca") throw new Error("T13: arc-diagonal should read 'ca', got '" + guess + "'");
+	if (sel.includes(1) || sel.includes(4)) throw new Error("T13: side dice polluted the word");
+	fireTouchXY("touchend", 130, 150); // release submits "ca" — too short, quietly clears
+	// east-bulging arc: same protection when the stroke bulges
+	// through a(1)'s box before turning down
+	fireTouchXY("touchstart", 50, 50);
+	fireTouchXY("touchmove", 110, 62); // 61px net — a(1)'s box must not fire
+	if (sel.length !== 1) throw new Error("T13: eastward arc bulge must not commit a(1), got " + JSON.stringify(sel));
+	fireTouchXY("touchmove", 115, 105);
+	fireTouchXY("touchmove", 130, 150);
+	if (sel.join(",") !== "0,5" || guess !== "ca") throw new Error("T13: east-bulge arc should end at the diagonal, got " + JSON.stringify(sel) + " '" + guess + "'");
+	endRun(); // stops the timer
+	console.log("T13 ok: arcing diagonals stay diagonals");
 
 	console.log("SMOKE OK");
 })().catch((e) => {
