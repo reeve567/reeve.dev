@@ -57,6 +57,7 @@ const mkEl = (tag) => {
 			el.firstChild = el.children[0] || null;
 			return child;
 		},
+		getBoundingClientRect: () => ({ left: 0, top: 0, width: 400, height: 400 }),
 	};
 	Object.defineProperty(el, "innerHTML", {
 		get() {
@@ -120,8 +121,6 @@ globalThis.document = {
 		return elements[id];
 	},
 	createElement: (tag) => mkEl(tag),
-	// die index passed as the x coordinate keeps the drag tests lean
-	elementFromPoint: (x) => board.children[Math.floor(x)] ?? null,
 };
 
 // ---- driver: appended to game.js so it shares scope ----
@@ -161,7 +160,7 @@ const driver = `
 	// not-spellable list catches adjacency mistakes
 	const known = ["c", "a", "t", "d", "l", "a", "r", "e", "p", "o", "s", "t", "t", "o", "n", "e"];
 	const solved = solveBoard(known);
-	for (const w of ["cat", "cart", "late", "rate", "lard", "tart", "tone", "tool", "loot", "post"]) {
+	for (const w of ["cart", "late", "rate", "lard", "tart", "tone", "tool", "loot", "post"]) {
 		if (!solved.has(w)) throw new Error("T2: expected '" + w + "' to be solvable");
 	}
 	for (const w of ["team", "teal", "stop", "note", "seal", "lean", "quiz", "quiet", "quips"]) {
@@ -198,7 +197,6 @@ const driver = `
 	console.log("T3 ok: qu die contributes two letters");
 
 	// T4: scoring table
-	if (wordPoints("cat") !== 1) throw new Error("T4: 3 letters = 1 pt");
 	if (wordPoints("cart") !== 1) throw new Error("T4: 4 letters = 1 pt");
 	if (wordPoints("carts") !== 2) throw new Error("T4: 5 letters = 2 pts");
 	if (wordPoints("teamsters") !== 11) throw new Error("T4: 9 letters = 11 pts");
@@ -311,15 +309,21 @@ const driver = `
 	updateDeadDice(); // refresh deadness for the swapped-in board
 	state = "ready";
 	startRun();
-	const fireTouch = (type, x) => {
+	// fireTouch takes a die index and aims at its center; fireTouchXY
+	// fires at raw coordinates (the stub board is a 400x400 grid,
+	// pitch 100, die centers at (col+0.5)*100, (row+0.5)*100)
+	const fireTouchXY = (type, x, y) => {
 		for (const fn of boardEl.listeners[type] || []) {
 			fn({
-				touches: [{ clientX: x, clientY: 0 }],
-				changedTouches: [{ clientX: x, clientY: 0 }],
+				touches: [{ clientX: x, clientY: y }],
+				changedTouches: [{ clientX: x, clientY: y }],
 				cancelable: true,
 				preventDefault() {},
 			});
 		}
+	};
+	const fireTouch = (type, die) => {
+		fireTouchXY(type, (die % 4 + 0.5) * 100, (((die / 4) | 0) + 0.5) * 100);
 	};
 	// drag c(0) → a(1) → r(6) → t(2): "cart", released → submitted
 	fireTouch("touchstart", 0);
@@ -327,24 +331,28 @@ const driver = `
 	fireTouch("touchmove", 1);
 	fireTouch("touchmove", 6);
 	if (guess !== "car") throw new Error("T8: dragging should build 'car', got '" + guess + "'");
-	fireTouch("touchmove", 0); // r(6) → t(2) is legal, but try an illegal jump first: 6 → 0 is not adjacent
-	if (guess !== "car") throw new Error("T8: illegal jumps must be ignored");
 	fireTouch("touchmove", 2);
 	if (guess !== "cart") throw new Error("T8: dragging should build 'cart'");
+	// finger off the board's corner: hover finds no die, intent is
+	// walled in by the grid — nothing changes
+	fireTouchXY("touchmove", 300, -50);
+	if (guess !== "cart") throw new Error("T8: off-board drags must not change the word");
 	fireTouch("touchend", 0);
 	if (guess !== "" || !found.has("cart") || score !== 1) throw new Error("T8: release should submit the dragged word");
-	// sliding back undoes: c(0) → a(1) → t(2), back to a(1), out to t(2)
+	// sliding back undoes: l(4) → a(5) → r(6) → d(3), back to r(6), out again
 	guess = "";
 	sel = [];
-	fireTouch("touchstart", 0);
-	fireTouch("touchmove", 1);
-	fireTouch("touchmove", 2);
-	if (guess !== "cat") throw new Error("T8: drag should build 'cat'");
-	fireTouch("touchmove", 1); // slide back onto the previous die
-	if (sel.length !== 2 || guess !== "ca") throw new Error("T8: sliding back should undo a step, got '" + guess + "'");
-	fireTouch("touchmove", 2);
-	fireTouch("touchend", 0); // release submits
-	if (guess !== "" || !found.has("cat") || score !== 2) throw new Error("T8: slide-back then release should score 'cat'");
+	fireTouch("touchstart", 4);
+	fireTouch("touchmove", 5);
+	fireTouch("touchmove", 6);
+	if (guess !== "lar") throw new Error("T8: drag should build 'lar'");
+	fireTouch("touchmove", 3);
+	if (guess !== "lard") throw new Error("T8: drag should build 'lard'");
+	fireTouch("touchmove", 6); // slide back onto the previous die
+	if (sel.length !== 3 || guess !== "lar") throw new Error("T8: sliding back should undo a step, got '" + guess + "'");
+	fireTouch("touchmove", 3);
+	fireTouch("touchend", 4); // release submits
+	if (guess !== "" || !found.has("lard") || score !== 2) throw new Error("T8: slide-back then release should score 'lard'");
 	// plain tap (no slide) on an adjacent die extends the selection
 	guess = "";
 	sel = [];
@@ -365,7 +373,7 @@ const driver = `
 
 	// T9: dead dice — once every word spellable through a die is found,
 	// the die grays out. on the known board, d(3) only spells "lard";
-	// c(0) spells cat, cart, carte, carts, and clot
+	// c(0) spells cart, carte, carts, and clot
 	initDay("2006-06-06");
 	faces = known.slice();
 	renderBoard();
@@ -385,7 +393,7 @@ const driver = `
 	if (!found.has("lard")) throw new Error("T9: lard should have submitted");
 	if (!dies[3].classList.contains("dead")) throw new Error("T9: d die should gray after lard — its only word");
 	if (dies[0].classList.contains("dead")) throw new Error("T9: c die must stay alive while its words are unfound");
-	const cWords = ["cat", "cart", "carte", "carts", "clot"];
+	const cWords = ["cart", "carte", "carts", "clot"];
 	for (let i = 0; i < cWords.length; i++) {
 		guess = cWords[i];
 		submitGuess();
@@ -438,6 +446,41 @@ const driver = `
 	if (matchWord("lard")) throw new Error("T10: matchWord must not route through dead dice");
 	endRun(); // stops the timer
 	console.log("T10 ok: dead dice refused by drag, tap, and typing");
+
+	// T11: drag intent — cutting the corner toward a diagonal selects
+	// the diagonal die even while the finger is still over the current
+	// die, and dragging back by direction undoes
+	initDay("2009-09-09");
+	faces = known.slice();
+	renderBoard();
+	allWords = solveBoard(faces);
+	found = new Set();
+	score = 0;
+	guess = "";
+	sel = [];
+	updateDeadDice();
+	state = "ready";
+	startRun();
+	// start on c(0) — die 0 occupies the top-left quarter; the corner
+	// between c(0), a(1), l(4), a(5) sits at (100,100)
+	fireTouchXY("touchstart", 50, 50);
+	if (sel.length !== 1 || sel[0] !== 0) throw new Error("T11: touchstart should select die 0");
+	// finger at (95,95): still inside die 0's box, but moving toward the
+	// corner — intent should snap to the diagonal a(5)
+	fireTouchXY("touchmove", 95, 95);
+	if (sel.length !== 2 || sel[1] !== 5) throw new Error("T11: corner-cutting diagonal should select die 5, got " + JSON.stringify(sel));
+	if (guess !== "ca") throw new Error("T11: diagonal drag should build 'ca', got '" + guess + "'");
+	// dragging back toward die 0 by direction undoes the step
+	fireTouchXY("touchmove", 60, 60);
+	if (sel.length !== 1 || sel[0] !== 0) throw new Error("T11: reverse drag should undo the diagonal step");
+	if (guess !== "c") throw new Error("T11: undo should leave 'c', got '" + guess + "'");
+	// a fast horizontal swipe chains through multiple dice per event:
+	// from die 0's center to (260, 60) points east of c → a → t
+	fireTouchXY("touchmove", 260, 60);
+	if (sel.length !== 3 || sel[1] !== 1 || sel[2] !== 2) throw new Error("T11: long swipe should chain 0→1→2, got " + JSON.stringify(sel));
+	if (guess !== "cat") throw new Error("T11: swiped word should read 'cat', got '" + guess + "'");
+	endRun(); // stops the timer
+	console.log("T11 ok: corner-cutting, direction undo, chained swipes");
 
 	console.log("SMOKE OK");
 })().catch((e) => {

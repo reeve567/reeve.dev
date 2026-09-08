@@ -6,10 +6,10 @@
 
 const SIZE = 4;
 const CELLS = SIZE * SIZE;
-const MIN_WORD = 3; // letters (the qu die counts as two)
+const MIN_WORD = 4; // letters (the qu die counts as two)
 const TIME_MS = 3 * 60 * 1000;
 const BOARD_ATTEMPTS = 8; // rolls per day, richest wins — no stinker dailies
-const PAR_FACTOR = 0.06;
+const PAR_FACTOR = 0.15;
 const PAR_MIN = 8;
 
 // the classic boggle dice, one face per roll
@@ -32,7 +32,7 @@ const DICE = [
 	["d", "e", "i", "l", "r", "x"],
 ];
 
-const POINTS = { 3: 1, 4: 1, 5: 2, 6: 3, 7: 5 };
+const POINTS = { 4: 1, 5: 2, 6: 3, 7: 5 };
 
 function wordPoints(word) {
 	return POINTS[word.length] ?? 11;
@@ -314,20 +314,79 @@ function dieClick(i) {
 
 // touch dragging: press a die, slide through adjacent letters, lift to
 // submit. sliding back along the path undoes a step; a plain tap (no
-// slide) falls back to the tap-to-build behavior
+// slide) falls back to the tap-to-build behavior. gets doubly
+// forgiving: fingers are imprecise — hovering a die uses grid math
+// over gaps, and moving away from the current die snaps to whichever
+// of its 8 neighbors best matches the drag direction, so diagonals
+// work by cutting through die corners
 let touchDrag = null;
 
-function dieIndexAt(x, y) {
-	const el = document.elementFromPoint(x, y);
-	if (!el || el.parentElement !== boardEl) return -1;
-	return Array.prototype.indexOf.call(boardEl.children, el);
+// which die is under a screen point — grid math, no dom walking
+function dieFromPoint(x, y) {
+	const rect = boardEl.getBoundingClientRect();
+	const col = Math.floor((x - rect.left) / (rect.width / SIZE));
+	const row = Math.floor((y - rect.top) / (rect.height / SIZE));
+	if (col < 0 || col >= SIZE || row < 0 || row >= SIZE) return -1;
+	return row * SIZE + col;
+}
+
+// the 8 drag directions, 45° apart, starting east
+const DRAG_DIRS = [
+	[1, 0],
+	[1, 1],
+	[0, 1],
+	[-1, 1],
+	[-1, 0],
+	[-1, -1],
+	[0, -1],
+	[1, -1],
+];
+
+// extend (or backtrack) the path by intent: if the finger has left
+// the current die's zone, snap its direction to the nearest diagonal
+// or orthogonal neighbor and take it. repeats a few times per move
+// event so fast swipes don't skip dice. backtrack needs hysteresis —
+// the finger must travel nearly to the previous die's center to pop,
+// otherwise a finger parked between two cells oscillates uselessly
+function dragByIntent(x, y) {
+	const rect = boardEl.getBoundingClientRect();
+	const pitch = rect.width / SIZE;
+	const pushZone = pitch * 0.55;
+	const popZone = pitch * 0.95;
+	for (let hop = 0; hop < 4; hop++) {
+		const last = sel[sel.length - 1];
+		if (last === undefined) return;
+		const col = last % SIZE;
+		const row = (last / SIZE) | 0;
+		const cx = rect.left + (col + 0.5) * pitch;
+		const cy = rect.top + (row + 0.5) * pitch;
+		const dx = x - cx;
+		const dy = y - cy;
+		const dist = Math.hypot(dx, dy);
+		if (dist < pushZone) return; // still inside the die's zone
+		const oct = ((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) % 8) + 8) % 8;
+		const nCol = col + DRAG_DIRS[oct][0];
+		const nRow = row + DRAG_DIRS[oct][1];
+		if (nCol < 0 || nCol >= SIZE || nRow < 0 || nRow >= SIZE) return;
+		const ni = nRow * SIZE + nCol;
+		if (sel.length > 1 && ni === sel[sel.length - 2]) {
+			if (dist < popZone) return; // barely left the die — not a real backtrack
+			sel.pop(); // dragged back along the path
+			touchDrag.moved = true;
+		} else if (!sel.includes(ni) && !deadDice[ni]) {
+			sel.push(ni);
+			touchDrag.moved = true;
+		} else {
+			return;
+		}
+	}
 }
 
 boardEl.addEventListener("touchstart", (e) => {
 	if (state !== "ready" && state !== "run") return;
 	e.preventDefault();
 	if (touchDrag) return; // one finger at a time
-	const i = dieIndexAt(e.touches[0].clientX, e.touches[0].clientY);
+	const i = dieFromPoint(e.touches[0].clientX, e.touches[0].clientY);
 	if (i === -1) return;
 	if (state === "ready") startRun();
 	touchDrag = { start: i, preSel: sel.slice(), preGuess: guess, moved: false };
@@ -345,16 +404,31 @@ boardEl.addEventListener("touchstart", (e) => {
 boardEl.addEventListener("touchmove", (e) => {
 	if (!touchDrag) return;
 	e.preventDefault();
-	const i = dieIndexAt(e.touches[0].clientX, e.touches[0].clientY);
-	if (i === -1 || i === sel[sel.length - 1]) return;
-	if (sel.length > 1 && i === sel[sel.length - 2]) {
-		sel.pop(); // slid back onto the previous die
-	} else if (sel.length && ADJ[sel[sel.length - 1]].includes(i) && !sel.includes(i) && !deadDice[i]) {
-		sel.push(i);
-		touchDrag.moved = true;
-	} else {
-		return; // no jumping to far dice, and no dead dice
+	const x = e.touches[0].clientX;
+	const y = e.touches[0].clientY;
+	const i = dieFromPoint(x, y);
+	const last = sel[sel.length - 1];
+	// direct hover on a fresh die handles its own selection semantics
+	if (i !== -1 && i !== last) {
+		let acted = false;
+		if (last !== undefined && sel.length > 1 && i === sel[sel.length - 2]) {
+			sel.pop(); // slid back onto the previous die
+			touchDrag.moved = true;
+			acted = true;
+		} else if (last !== undefined && ADJ[last].includes(i) && !sel.includes(i) && !deadDice[i]) {
+			sel.push(i);
+			touchDrag.moved = true;
+			acted = true;
+		}
+		if (acted) {
+			guess = sel.map((ci) => faces[ci]).join("");
+			paintSelection();
+			return;
+		}
 	}
+	// otherwise move by drag direction — corner-cutting diagonals,
+	// gaps, and off-board fingers all still drive the path
+	dragByIntent(x, y);
 	guess = sel.map((ci) => faces[ci]).join("");
 	paintSelection();
 }, { passive: false });
