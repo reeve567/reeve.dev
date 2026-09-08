@@ -269,6 +269,7 @@ function initDay(dayStr) {
 	practice = !!record;
 	state = "ready";
 	stopTimer();
+	touchDrag = null; // a day switch kills any gesture in flight
 	renderBoard();
 	renderWords();
 	paintSelection();
@@ -347,15 +348,17 @@ const DRAG_DIRS = [
 // or orthogonal neighbor and take it. repeats a few times per move
 // event so fast swipes don't skip dice. backtrack needs hysteresis —
 // the finger must travel nearly to the previous die's center to pop,
-// otherwise a finger parked between two cells oscillates uselessly
+// otherwise a finger parked between two cells oscillates uselessly.
+// returns whether the path changed
 function dragByIntent(x, y) {
 	const rect = boardEl.getBoundingClientRect();
 	const pitch = rect.width / SIZE;
 	const pushZone = pitch * 0.55;
 	const popZone = pitch * 0.95;
+	let acted = false;
 	for (let hop = 0; hop < 4; hop++) {
 		const last = sel[sel.length - 1];
-		if (last === undefined) return;
+		if (last === undefined) return acted;
 		const col = last % SIZE;
 		const row = (last / SIZE) | 0;
 		const cx = rect.left + (col + 0.5) * pitch;
@@ -363,23 +366,26 @@ function dragByIntent(x, y) {
 		const dx = x - cx;
 		const dy = y - cy;
 		const dist = Math.hypot(dx, dy);
-		if (dist < pushZone) return; // still inside the die's zone
+		if (dist < pushZone) return acted; // still inside the die's zone
 		const oct = ((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) % 8) + 8) % 8;
 		const nCol = col + DRAG_DIRS[oct][0];
 		const nRow = row + DRAG_DIRS[oct][1];
-		if (nCol < 0 || nCol >= SIZE || nRow < 0 || nRow >= SIZE) return;
+		if (nCol < 0 || nCol >= SIZE || nRow < 0 || nRow >= SIZE) return acted;
 		const ni = nRow * SIZE + nCol;
 		if (sel.length > 1 && ni === sel[sel.length - 2]) {
-			if (dist < popZone) return; // barely left the die — not a real backtrack
+			if (dist < popZone) return acted; // barely left the die — not a real backtrack
 			sel.pop(); // dragged back along the path
 			touchDrag.moved = true;
+			acted = true;
 		} else if (!sel.includes(ni) && !deadDice[ni]) {
 			sel.push(ni);
 			touchDrag.moved = true;
+			acted = true;
 		} else {
-			return;
+			return acted;
 		}
 	}
+	return acted;
 }
 
 boardEl.addEventListener("touchstart", (e) => {
@@ -406,9 +412,18 @@ boardEl.addEventListener("touchmove", (e) => {
 	e.preventDefault();
 	const x = e.touches[0].clientX;
 	const y = e.touches[0].clientY;
+	// heading decides first: a diagonal drag cuts through an orthogonal
+	// neighbor's box on the way to the shared corner, and the finger's
+	// direction — not the box it happens to be in — tells us which die
+	// is meant
+	if (dragByIntent(x, y)) {
+		guess = sel.map((ci) => faces[ci]).join("");
+		paintSelection();
+		return;
+	}
+	// hover fallback for deliberate, on-the-die drags
 	const i = dieFromPoint(x, y);
 	const last = sel[sel.length - 1];
-	// direct hover on a fresh die handles its own selection semantics
 	if (i !== -1 && i !== last) {
 		let acted = false;
 		if (last !== undefined && sel.length > 1 && i === sel[sel.length - 2]) {
@@ -423,14 +438,8 @@ boardEl.addEventListener("touchmove", (e) => {
 		if (acted) {
 			guess = sel.map((ci) => faces[ci]).join("");
 			paintSelection();
-			return;
 		}
 	}
-	// otherwise move by drag direction — corner-cutting diagonals,
-	// gaps, and off-board fingers all still drive the path
-	dragByIntent(x, y);
-	guess = sel.map((ci) => faces[ci]).join("");
-	paintSelection();
 }, { passive: false });
 
 boardEl.addEventListener("touchend", (e) => {

@@ -482,6 +482,37 @@ const driver = `
 	endRun(); // stops the timer
 	console.log("T11 ok: corner-cutting, direction undo, chained swipes");
 
+	// T12: diagonal transit — a diagonal-bound finger that passes
+	// through an orthogonal neighbor's box must take the diagonal, not
+	// get captured by the box it happens to be crossing
+	initDay("2010-10-10");
+	faces = known.slice();
+	renderBoard();
+	allWords = solveBoard(faces);
+	found = new Set();
+	score = 0;
+	guess = "";
+	sel = [];
+	updateDeadDice();
+	state = "ready";
+	startRun();
+	// from c(0) toward the shared corner with a(5): the finger rides
+	// through a(1)'s box at ~35° — heading says diagonal
+	fireTouchXY("touchstart", 50, 50);
+	fireTouchXY("touchmove", 115, 96);
+	if (sel.length !== 2 || sel[1] !== 5) throw new Error("T12: diagonal transit must take die 5, got " + JSON.stringify(sel));
+	if (guess !== "ca") throw new Error("T12: diagonal transit should build 'ca', got '" + guess + "'");
+	fireTouchXY("touchend", 115, 96); // release submits "ca" — too short, quietly clears
+	if (guess !== "" || sel.length) throw new Error("T12: release should clear the gesture");
+	// a finger clearly heading east into a(1) still takes a(1)
+	guess = "";
+	sel = [];
+	fireTouchXY("touchstart", 50, 50);
+	fireTouchXY("touchmove", 115, 55);
+	if (sel[1] !== 1) throw new Error("T12: eastward drag must take die 1, got " + JSON.stringify(sel));
+	endRun(); // stops the timer
+	console.log("T12 ok: headings outrank boxes in transit");
+
 	console.log("SMOKE OK");
 })().catch((e) => {
 	console.error("SMOKE FAILED:", e.message);
