@@ -344,17 +344,20 @@ const DRAG_DIRS = [
 ];
 
 // drag intent reads the stroke, not the address: the net finger
-// travel since the last commit decides the next die. once enough
-// distance accumulates, the heading snaps to the nearest of the 8
-// neighbors and commits. arcing strokes toward a diagonal dip
-// sideways first — under threshold, they don't fire until the net
-// direction settles; a parked finger can never re-fire either, since
-// the anchor resets on every commit. long strokes chain roughly one
-// die per cell of travel for fast swipes
+// travel since the last commit decides the next die. two gates keep
+// it honest — the net stroke must be long enough that a heading has
+// settled (arcing diagonals dip sideways first and stay under it),
+// and the finger must have left the current square by its center
+// distance, so a corner press with a short stroke can't select the
+// neighbor while still sitting inside it. the anchor resets on every
+// commit so a parked finger never re-fires; long strokes chain
+// roughly one die per cell of travel for fast swipes
 function dragByIntent(x, y) {
 	if (!touchDrag || !sel.length) return false;
-	const pitch = boardEl.getBoundingClientRect().width / SIZE;
+	const rect = boardEl.getBoundingClientRect();
+	const pitch = rect.width / SIZE;
 	const commit = pitch * 0.7;
+	const exitGate = pitch * 0.55;
 	const dx = x - touchDrag.markX;
 	const dy = y - touchDrag.markY;
 	const total = Math.hypot(dx, dy);
@@ -368,6 +371,9 @@ function dragByIntent(x, y) {
 		const last = sel[sel.length - 1];
 		const col = last % SIZE;
 		const row = (last / SIZE) | 0;
+		const cx = rect.left + (col + 0.5) * pitch;
+		const cy = rect.top + (row + 0.5) * pitch;
+		if (Math.hypot(x - cx, y - cy) < exitGate) break; // still inside the square
 		const nCol = col + dcol;
 		const nRow = row + drow;
 		if (nCol < 0 || nCol >= SIZE || nRow < 0 || nRow >= SIZE) break;

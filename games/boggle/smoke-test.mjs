@@ -551,6 +551,33 @@ const driver = `
 	endRun(); // stops the timer
 	console.log("T13 ok: arcing diagonals stay diagonals");
 
+	// T14: not trigger happy — a corner press with a long-enough
+	// stroke that stays inside the current square must not select
+	// the next die until the finger actually leaves the square
+	initDay("2012-12-12");
+	faces = known.slice();
+	renderBoard();
+	allWords = solveBoard(faces);
+	found = new Set();
+	score = 0;
+	guess = "";
+	sel = [];
+	updateDeadDice();
+	state = "ready";
+	startRun();
+	// press deep in die 0's top-left corner, stroke ~85px net —
+	// enough distance, but the finger is still inside the square
+	fireTouchXY("touchstart", 20, 20);
+	fireTouchXY("touchmove", 85, 75);
+	if (sel.length !== 1 || sel[0] !== 0) throw new Error("T14: inside-the-square stroke must not commit, got " + JSON.stringify(sel));
+	// continue past the square boundary — now it commits
+	fireTouchXY("touchmove", 105, 105);
+	if (sel.join(",") !== "0,5") throw new Error("T14: leaving the square should commit the diagonal, got " + JSON.stringify(sel));
+	if (guess !== "ca") throw new Error("T14: committed stroke should read 'ca', got '" + guess + "'");
+	fireTouchXY("touchend", 105, 105); // submits "ca" — too short, quietly clears
+	endRun(); // stops the timer
+	console.log("T14 ok: strokes must exit the square before committing");
+
 	console.log("SMOKE OK");
 })().catch((e) => {
 	console.error("SMOKE FAILED:", e.message);
